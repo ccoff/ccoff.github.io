@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 AUTHOR = u'Chris Coffey'
-SITENAME = u'ccoff GH Pages'
+SITENAME = u'ccoff GitHub Pages'
 SITEURL = ''
 
 PATH = 'content'
@@ -34,3 +34,4 @@ DEFAULT_PAGINATION = 10
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
 THEME = 'themes/octopress'
+STATIC_PATHS = ['images']

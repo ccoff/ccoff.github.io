@@ -30,14 +30,16 @@
 <body>
   <header role="banner"><hgroup>
   <h1><a href="https://ccoff.github.io/">ccoff GitHub Pages</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
 </hgroup></header>
   <nav role="navigation"><ul class="subscription" data-subscription="rss">
 </ul>
 
 
 <ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
       <li class="active">
-        <a href="https://ccoff.github.io/category/blog.html">Blog</a>
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
       </li>
 </ul></nav>
   <div id="main">
@@ -51,15 +53,15 @@
     	<div id="blog-archives">
             <h2>2018</h2>
                     <article>
-                        <h1><a href="https://ccoff.github.io/my-first-post.html">My first post</a></h1>
-                        <time datetime="2018-05-23 16:10:00+01:00" pubdate>
+                        <h1><a href="https://ccoff.github.io/my-first-post">My first post</a></h1>
+                        <time datetime="2018-05-28 22:33:02.567360+01:00" pubdate>
                             <span class="month">May</span>
-                            <span class="day">23</span>
+                            <span class="day">28</span>
                             <span class="year">2018</span>
                         </time>
                         <footer>
                             <span class="categories">posted in
-                                <a class='category' href='https://ccoff.github.io/category/blog.html'>blog</a>
+                                <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
                             </span>
                         </footer>
                     </article>
@@ -71,7 +73,7 @@
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
-          <a href="https://ccoff.github.io/my-first-post.html">My first post</a>
+          <a href="https://ccoff.github.io/my-first-post">My first post</a>
       </li>
     </ul>
   </section>
@@ -79,16 +81,49 @@
       
     <h1>Categories</h1>
     <ul id="recent_posts">
-        <li><a href="https://ccoff.github.io/category/blog.html">blog</a></li>
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
     </ul>
   </section>
  
 
   <section>
   <h1>Tags</h1>
-    <a href="https://ccoff.github.io/tag/blog.html">blog</a>,    <a href="https://ccoff.github.io/tag/first.html">first</a>  </section>
+    <a href="https://ccoff.github.io/tag/first">first</a>  </section>
 
 
+
+  <section>
+    <h1>GitHub Repos</h1>
+    <ul id="gh_repos">
+      <li class="loading">Status updating...</li>
+    </ul>
+    <script type="text/javascript">
+      $.domReady(function(){
+          if (!window.jXHR){
+              var jxhr = document.createElement('script');
+              jxhr.type = 'text/javascript';
+              jxhr.src = 'https://ccoff.github.io/theme/js/jXHR.js';
+              var s = document.getElementsByTagName('script')[0];
+              s.parentNode.insertBefore(jxhr, s);
+          }
+
+          github.showRepos({
+              user: 'ccoff',
+              count: 5,
+              skip_forks: false,
+              target: '#gh_repos'
+          });
+      });
+    </script>
+    <script src="https://ccoff.github.io/theme/js/github.js" type="text/javascript"> </script>
+  </section>
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
 
 </aside>    </div>
   </div>

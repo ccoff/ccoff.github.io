@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-AUTHOR = u'Chris Coffey'
-SITENAME = u'ccoff GitHub Pages'
+AUTHOR = u'Chris Coffey (ccoff)'
+SITENAME = u'0xCC0FF'
 SITESUBTITLE = 'A companion blog to my GitHub account'
 SITEURL = ''
 #GITHUB_URL = 'https://github.com/ccoff'
@@ -20,7 +20,7 @@ CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
-FEED_ALL_RSS = 'feeds/all.rss.xml'
+#FEED_ALL_RSS = 'feeds/all.rss.xml'
 
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
@@ -38,7 +38,7 @@ RELATIVE_URLS = True
 # https://github.com/duilio/pelican-octopress-theme
 THEME = 'themes/pelican-octopress-theme'
 STATIC_PATHS = ['images']
-# Post date will be from file timestamp. To set a specfici date, use 'Date:' in
+# Post date will be from file timestamp. To set a specific date, use 'Date:' in
 # the metadata:
 DEFAULT_DATE = 'fs'
 LOAD_CONTENT_CACHE = False
@@ -51,9 +51,4 @@ MENUITEMS = [('About', '/pages/about')]
 # Octopress theme doesn't seem to honor this one:
 #DISPLAY_PAGES_ON_MENU = True
 #DISPLAY_CATEGORIES_ON_MENU = True
-#DISPLAY_FEEDS_ON_MENU = True
-GITHUB_USER = 'ccoff'
-GITHUB_REPO_COUNT = 5
-#GITHUB_SKIP_FORK = False
-#GITHUB_SHOW_USER_LINK = False
 

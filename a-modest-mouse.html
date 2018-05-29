@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>A modest mouse: Building a low-cost, head-mounted infrared pointing device &mdash; 0xCC0FF</title>
+  <meta name="author" content="Chris Coffey (ccoff)">
+
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://ccoff.github.io/favicon.png" rel="icon">
+
+  <link href="https://ccoff.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://ccoff.github.io/">0xCC0FF</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
+      <li class="active">
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
+      </li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">A modest mouse: Building a low-cost, head-mounted infrared pointing device</h1>
+    <p class="meta">
+<time datetime="2018-05-29T16:45:34.578452+01:00" pubdate>Tue 29 May 2018</time>    </p>
+</header>
+
+  <div class="entry-content"><p>I stopped using a mouse a few years ago and replaced it with a small USB touchpad. Still, I've always had an eye on getting rid of hand-based pointing devices completely. A few months back, I saw <a href="https://arstechnica.com/gaming/2018/02/coding-without-a-keystroke-the-hands-free-creation-of-a-full-video-game">an article on Ars Technica</a> about a coder who programmed a game entirely without using his hands. He primarily used speech recognition, but for a mouse replacement, he used a <a href="https://www.naturalpoint.com/smartnav/products/4-at">SmartNav 4</a>.</p>
+<p>The SmartNav 4 uses an infrared (IR) transmitter, reflector, and sensor to track a user's head movements and move the mouse pointer accordingly. Essentially a combined transmitter/receiver unit sits by the monitor. It sends out an IR beam that gets reflected back to the sensor by a special sticker affixed on the user's head (either directly, or on a hat).</p>
+<p>Unfortunately, the SmartNav costs $500 US -- not exactly an inexpensive piece of hardware! And SmartNav is one of the 'cheaper' options; you can easily pay $1500 US for similar products.</p>
+<p>It got me thinking about building a head-based IR pointing device on the cheap. I considered a design similar to the SmartNav, but I wasn't excited about shining IR LEDs into my eyes for long periods of time. Supposedly the SmartNav has filters to handle this, but I didn't want to take the risk with my own setup. So instead of the transmitter beaming IR towards the head (as the SmartNav does), my head would be the 'platform' for the IR transmitter, and the computer would be the IR receiver.</p>
+<h2>Hardware</h2>
+<p>First I needed something that could detect IR on the computer's side. I had a cheap webcam lying around:</p>
+<p><img src="images/cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" height="240" /></p>
+<p>I did the tried-and-true test of pressing a button on a TV remote and looking at the resultant image captured by the webcam:</p>
+<p><img src="images/webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" height="240" /></p>
+<p>No problem there: the camera could 'see' in infrared. In fact every webcam I tested (four in total) detected IR. </p>
+<p>Next up was the IR transmitter. It needed to be head-mounted, and comfortable. A modifiable headlamp seemed the way to go. As a proof-of-concept first though, I put together a dead-simple, battery-powered IR LED 'transmitter' on a breadboard:</p>
+<p><img src="images/breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" height="240" /></p>
+<p>The webcam detected it easily, and basic software tracking using <a href="https://www.opencv.org">OpenCV</a> looked promising (more on this below). Stray IR and light from windows, overhead lights, and other sources was a problem though. I needed a pass filter for IR wavelengths that I could put over the webcam lens, and <a href="https://www.aliexpress.com/item/9mm-Filter-Lens-Filtering-against-400nm-750nm-Pass-808nm-1064nm-IR-InfraRed-Laser-Only/32278589551.html">this 808nm-1064nm wavelength IR pass filter</a> seemed the perfect size at 9mm diameter:</p>
+<p><img src="images/ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" height="240" /></p>
+<p>And here is the filter covering the webcam lens:</p>
+<p><img src="images/cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" height="240" /></p>
+<p>The filter dramatically reduced unwanted light from reaching the camera. I could now reliably detect and track the IR transmitter beam in various conditions: sunlight coming through open curtains, overhead lights on, etc.</p>
+<p>It was time to spend some money on a 'real' IR transmitter. I needed a headlamp with LEDs that I could modify, and <a href="https://www.amazon.com/Headlamp-Headlight-Battery-Batteries-Included/dp/B005FEGYJC">this one on Amazon</a> seemed to fit the bill. </p>
+<p>Disassembling the lamp was easy: twist the lens cap, remove a holding bracket, and unscrew the circuit board containing the LEDs:</p>
+<p><img src="images/headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /></p>
+<p><img src="images/headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /></p>
+<p><img src="images/headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /></p>
+<p><img src="images/headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /></p>
+<p>The lamp has four lighting modes: three levels of white light brightness (2 LEDs, 10 LEDs, and 18 LEDs), and a red flashing mode. I de-soldered the two LEDs in the center that provide the lowest white light level, and soldered two <a href="https://uk.rs-online.com/web/p/ir-leds/6997663">890nm IR LEDs</a> in their place. (If you do this yourself, remember that LEDs are diodes, and the positive/negative terminals need to be soldered in the correct orientation. Look at the other LEDs on the board to determine which way they should go.)</p>
+<p>I put everything back together and tested the headlamp with the IR webcam receiver. It worked brilliantly (pun intended) -- one push of the power button turned on the IR LEDs, another push enabled medium white light, another push enabled high white light, another push enabled red flashing, and a final push turned the lamp off.</p>
+<p>I now had a functioning head-mounted IR transmitter that still worked as a "normal" headlamp if necessary.</p>
+<h3>Parts list</h3>
+<ul>
+<li><a href="https://www.amazon.com/Headlamp-Headlight-Battery-Batteries-Included/dp/B005FEGYJC">Headlamp</a> (here is a <a href="https://www.amazon.co.uk/Lighting-EVER-3200001-LED-Headlamp/dp/B005FEGYJC">UK variant</a>): $8 US / £6 UK</li>
+<li><a href="https://uk.rs-online.com/web/p/ir-leds/6997663">890nm IR LEDs</a>: $4.75 US / £3.40 UK for a pack of 10 (though we only need two of them for the headlamp)</li>
+<li><a href="https://www.aliexpress.com/item/9mm-Filter-Lens-Filtering-against-400nm-750nm-Pass-808nm-1064nm-IR-InfraRed-Laser-Only/32278589551.html">IR pass filter</a>: $4.75 US / £3.40 UK</li>
+</ul>
+<p>So for less than $20 US (not counting a soldering iron or webcam) we have all the parts we need to create a head-mounted pointing device and receiver. </p>
+<p>Remember though, like the SmartNav and other related devices, this is solely a <strong>pointing</strong> device: all it does is move the mouse pointer. It doesn't do mouse button clicks. For clicking, you need something else: a speech recognition application, a foot pedal, a USB button... there are many possibilities.</p>
+<h2>Software</h2>
+<p>(To view the code, see the <a href="https://github.com/ccoff/ir-mouse">GitHub repository</a>.)</p>
+<p>With the hardware components ready, it was time to turn to the equally important task of writing some code to track the IR beam and move the mouse pointer.</p>
+<p><a href="https://www.opencv.org">OpenCV</a> is ideally suited to this task -- determining where a particular type of object is located in an image. With built-in routines for webcam image capture and processing, it really takes a lot of the hard work off your hands, allowing you to concentrate on tracking that IR beam.</p>
+<p>For mouse pointer manipulation, I had used <a href="https://github.com/PyUserInput/PyUserInput">PyUserInput</a> in another project of mine, and it had worked well. PyUserInput is Python-based, and OpenCV has Python bindings available. (I use Debian, and it includes the python-opencv package; your Linux distribution probably does as well. I have not tested this on Windows.)</p>
+<p>I had concerns that performance might be unacceptably slow using Python with OpenCV, but they proved to be unfounded. The app hums along with no noticeable lag between head movement and mouse pointer movement.</p>
+<p>Again, see <a href="https://github.com/ccoff/ir-mouse">the code</a> for details as to what is going on under the hood, but in short, it uses value and hue thresholds to filter out everything in the captured image but the IR beam. (The IR pass filter on the webcam makes this process much more reliable.) If the beam has moved a sufficient distance, we move the mouse pointer accordingly. The greater the distance the IR pointer moves, the greater the scale factor we use to determine how much the mouse pointer moves.</p>
+<p>It took some fiddling to achieve an acceptable acceleration rate for the pointer, as well as handle small, fine adjustments. If you use this code in your own project, you will likely want to adjust these values (as well as the hue and value thresholds) for your own setup and preferences.</p>
+<h2>Final thoughts</h2>
+<p>So now that I have this setup, have I ditched the touchpad? No, not completely. You have to wear a headlamp on your head, which can get cumbersome. A logical next step would be to try and remove the headlamp / IR pass filter from the mix completely, and just detect head or eye movement directly, perhaps by using <a href="https://docs.opencv.org/2.4/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html">OpenCV's CascadeClassifiers</a>. (Hacking a headlamp is a lot more fun though!)</p>
+<p>In any event, I hope this project helps and inspires others who are looking for a low-cost, assistive technology pointing device.</p></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Chris Coffey (ccoff)
+    </span>
+  </span>
+<time datetime="2018-05-29T16:45:34.578452+01:00" pubdate>Tue 29 May 2018</time>  <span class="categories">
+    <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a class="category" href="https://ccoff.github.io/tag/hci">hci</a>,    <a class="category" href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a class="category" href="https://ccoff.github.io/tag/python">python</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://ccoff.github.io/a-modest-mouse">A modest mouse: Building a low-cost, head-mounted infrared pointing device</a>
+      </li>
+    </ul>
+  </section>
+  <!--
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
+    </ul>
+  </section>
+  -->
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2018  Chris Coffey (ccoff) &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://ccoff.github.io/theme/js/ender.js"></script>
+  <script src="https://ccoff.github.io/theme/js/octopress.js" type="text/javascript"></script>
+</body>
+</html>

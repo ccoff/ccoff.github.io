@@ -2,6 +2,7 @@ Title: A modest mouse: Building a low-cost, head-mounted infrared pointing devic
 Category: blog
 Tags: accessibility, hci, opencv, python
 Slug: a-modest-mouse
+Date: 2018-05-30
 
 I stopped using a mouse a few years ago and replaced it with a small USB touchpad. Still, I've always had an eye on getting rid of hand-based pointing devices completely. A few months back, I saw [an article on Ars Technica](https://arstechnica.com/gaming/2018/02/coding-without-a-keystroke-the-hands-free-creation-of-a-full-video-game) about a coder who programmed a game entirely without using his hands. He primarily used speech recognition, but for a mouse replacement, he used a [SmartNav 4](https://www.naturalpoint.com/smartnav/products/4-at).
 

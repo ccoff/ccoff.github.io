@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Preserving IMAP keywords during e-mail migrations &mdash; 0xCC0FF</title>
+  <meta name="author" content="Chris Coffey (ccoff)">
+
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://ccoff.github.io/favicon.png" rel="icon">
+
+  <link href="https://ccoff.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://ccoff.github.io/">0xCC0FF</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
+      <li class="active">
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
+      </li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">Preserving IMAP keywords during e-mail migrations</h1>
+    <p class="meta">
+<time datetime="2018-08-27T00:00:00+01:00" pubdate>Mon 27 August 2018</time>    </p>
+</header>
+
+  <div class="entry-content"><p>Recently I had to migrate several e-mail accounts from one server to another. Some of the accounts were quite large; one had over 20,000 messages in it. I tried a few IMAP migration tools, but they all had some issue or another -- one would hang after a few thousand messages, while another one skipped messages here and there, seemingly at random.</p>
+<p>Searching GitHub, I came across <a href="https://github.com/wrzlbrmft/imapcopy">Imapcopy</a>, a PHP-based IMAP migration script that didn't have a lot of extra bells and whistles. It appeared to just "do one thing and do it well" -- get all of the messages from one server to the other. In my testing, it worked well in almost every way; it was stable, fast, and didn't skip any messages. Unfortunately, however, it didn't preserve IMAP keywords.</p>
+<p><strong>IMAP keywords</strong>, also known as <strong>custom flags</strong> or <strong>tags</strong>, are user-defined labels that you can assign to messages. Messages can have more than one keyword associated with them, allowing for multi-dimensional sorting. For example, you could define "Personal", "Family", and "Friends" keywords, and assign them interchangeably to messages and sort accordingly. Additionally, many e-mail clients use some sort of visual indicator (e.g., color) to differentiate messages by keyword, allowing you to rapidly scan an inbox and see what types of messages it contains.</p>
+<p>My primary e-mail client, <a href="https://www.thunderbird.net">Thunderbird</a>, uses these keywords extensively, both for arbitrary user-defined tags and for core functionality. For example, forwarded messages contain the <a href="https://tools.ietf.org/html/rfc5788#section-3.4.2">"$Forwarded"</a> keyword, which Thunderbird uses to display a special icon next to the message. I use several custom keywords to organize messages in my inboxes, and I absolutely had to have these preserved with the messages.</p>
+<p>So I looked at adding IMAP keyword preservation to Imapcopy. It had been awhile since I had worked with PHP, and I quickly discovered the built-in PHP IMAP e-mail functions were a bit lacking -- there was no function to directly fetch message keywords. However, you can obtain the raw IMAP message headers with the <a href="https://secure.php.net/manual/en/function.imap-headers.php"><strong>imap_headers()</strong></a> function. Here is a sample IMAP header as returned by <strong>imap_headers()</strong>: </p>
+<div class="highlight"><pre><span></span>  A    30)28-Jun-2018 Postmaster           {NonJunk $Forwarded} Registration renewal (3245 chars)
+</pre></div>
+
+
+<p>The keywords always start at position 44 in the header, and are enclosed in braces {}. From that we can manually parse the header and obtain the keywords.</p>
+<p>From there, it was a simple matter of adding the parsed keywords to the migrated message's header. I tested everything thoroughly (the last thing we want is a corrupted mailbox!) and everything migrated over correctly. A merged <a href="https://github.com/wrzlbrmft/imapcopy/pull/7">pull request</a> later, and Imapcopy now does everything I want it to do, quickly and easily creating a perfect (as near as I can tell) duplicate of the source message and its attributes on the destination server with minimal fuss.</p></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Chris Coffey (ccoff)
+    </span>
+  </span>
+<time datetime="2018-08-27T00:00:00+01:00" pubdate>Mon 27 August 2018</time>  <span class="categories">
+    <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://ccoff.github.io/tag/imap">imap</a>,    <a class="category" href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a class="category" href="https://ccoff.github.io/tag/php">php</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/a-modest-mouse">A modest mouse: Building a low-cost, head-mounted infrared pointing device</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/temperature-sensor-sdr-radio">Decoding temperature sensor data using software-defined radio</a>
+      </li>
+    </ul>
+  </section>
+  <!--
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
+    </ul>
+  </section>
+  -->
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2017&ndash;2018  Chris Coffey (ccoff) &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://ccoff.github.io/theme/js/ender.js"></script>
+  <script src="https://ccoff.github.io/theme/js/octopress.js" type="text/javascript"></script>
+</body>
+</html>

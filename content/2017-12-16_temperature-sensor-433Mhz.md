@@ -44,7 +44,7 @@ One final piece remained -- the last nibble in the packet changed based on the p
 
 ## Putting it all together
 
-Having decoded the temperature sensor's protocol, it was easy enough to write up a decoder for it in rtl_433. A [Github PR](https://github.com/merbanan/rtl_433/pull/619) later, and rtl_433 now includes support for my Philips temperature sensor (see the code [here](https://github.com/merbanan/rtl_433/blob/master/src/devices/philips.c)).
+Having decoded the temperature sensor's protocol, it was easy enough to write up a decoder for it in rtl_433. A [Github PR](https://github.com/merbanan/rtl_433/pull/619) later, and rtl_433 now includes support for my Philips temperature sensor (see the code [here](https://github.com/merbanan/rtl_433/blob/master/src/devices/philips_aj3650.c)).
 
 Now I can pick off data from the temperature sensor and output it in a variety of formats for further processing. Here's some sample output, with sensor data in JSON on the last line:
 

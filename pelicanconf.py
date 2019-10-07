@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
+from datetime import date
 
 AUTHOR = u'Chris Coffey (ccoff)'
 SITENAME = u'0xCC0FF'
@@ -11,6 +12,7 @@ SITEURL = ''
 PATH = 'content'
 
 TIMEZONE = 'Europe/London'
+CURRENT_YEAR = date.today().year
 
 DEFAULT_LANG = u'en'
 

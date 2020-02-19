@@ -49,7 +49,7 @@ ARTICLE_URL = '{slug}'
 CATEGORY_URL = 'category/{slug}'
 TAG_URL = 'tag/{slug}'
 AUTHOR_URL = 'author/{slug}'
-MENUITEMS = [('About', '/pages/about')]
+MENUITEMS = [('About', '/pages/about'), ('RSS', '/pages/rss')]
 # Octopress theme doesn't seem to honor this one:
 #DISPLAY_PAGES_ON_MENU = True
 #DISPLAY_CATEGORIES_ON_MENU = True

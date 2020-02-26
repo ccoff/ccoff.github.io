@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>The art of finding a UART &mdash; 0xCC0FF</title>
+  <meta name="author" content="Chris Coffey (ccoff)">
+
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://ccoff.github.io/favicon.png" rel="icon">
+
+  <link href="https://ccoff.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://ccoff.github.io/">0xCC0FF</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
+    <li><a href="/pages/rss">RSS</a></li>
+      <li class="active">
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
+      </li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">The art of finding a UART</h1>
+    <p class="meta">
+<time datetime="2020-01-21T00:00:00+00:00" pubdate>Tue 21 January 2020</time>    </p>
+</header>
+
+  <div class="entry-content"><p>Recently I had access to an <a href="https://www.meetibi.com">Ibi</a> to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi smartphone app, and that app requires a ridiculous amount of permissions -- you might as well install a backdoor on your phone. I wanted to see what made the Ibi tick, and if it could be customized.</p>
+<p>On the outside, the Ibi has a USB 3.0 port, power jack, and LED. There is no ethernet port, only WiFi, and no video output. Beyond that it's a black box (figuratively speaking, as it has a white case). What I needed was a serial <a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter">UART</a> (universal asynchronous receiver-transmitter) connection to see device startup messages and information about its configuration. Many routers, switches, and other embedded devices have some sort of UART capability for troubleshooting and diagnostic purposes, and I hoped the Ibi would be the same.</p>
+<p>I opened up the case, and the Ibi's innards slid out easily enough. There was a main <a href="https://en.wikipedia.org/wiki/Printed_circuit_board">PCB</a> with the hard drive underneath:</p>
+<p><img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" height="360" /></p>
+<p>Of most interest was the 4-pin header at J1 (circled in the image above), which I suspected was a UART. With the Ibi powered off, I used a multimeter to test J1's pins for ground, which turned out to be pin 4. Pins 2 and 3 had thin traces on the back of the PCB running towards the <a href="https://en.wikipedia.org/wiki/System_on_a_chip">SoC</a> (see arrows in the image below). These were quite likely the transmit (TX) and receive (RX) pins: </p>
+<p><img src="images/ibi-uart-traces.jpg" alt="Image: J1 header, pins 2 and 3 traces" width="480" height="360" /></p>
+<p>So pin 1 remained as the likely candidate for power (VCC). I powered up the device several times, measuring the voltage on pins 1, 2, and 3. Pins 1 and 3 remained steady at 3.3V, but the voltage on pin 2 fluctuated during startup. This was probably the TX pin shoveling out serial data.</p>
+<p>Based on all of this information, at this point I was pretty confident that pin 1 = VCC, pin 2 = TX, pin 3 = RX, and 4 = GND. Before I hooked up my USB-UART adapter though, I used a logic analyzer to confirm my hypothesis. The analyzer's parser showed that there was indeed outgoing data that it could decode on pin 2:</p>
+<p><img src="images/ibi-saleae-capture.png" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" height="349"/></p>
+<p>Next, I connected the USB-UART adapter and started <em>screen</em> at the standard 115200 baud rate:</p>
+<div class="highlight"><pre><span></span>screen /dev/ttyUSB0 115200
+</pre></div>
+
+
+<p>I powered up the board, and was greeted with a stream of text as U-Boot and the kernel did their thing:</p>
+<div class="highlight"><pre><span></span>[sid]delta long!!11250
+
+[sid]delta long!!11250
+
+C1:80000000
+C2
+?
+C3h
+hwsetting size: 000005EC
+C4
+f 
+5-5
+Goto FSBL: 0x10100000
+
+[*** Output truncated for brevity ***]
+
+CPU  : Cortex-A53 quad core - AARCH32
+Board: Realtek QA Board
+DRAM:  1 GiB
+Watchdog: Disabled
+Cache: Enabled
+Non-Cache Region: 1 MB@0x07900000
+nor flash id [0x00ef4014]
+sector 256k en: 0
+sector  64k en: 1
+sector  32k en: 1
+sector   4k en: 1
+page_program  : 1
+max capacity  : 0x00100000
+spi type name : WINBOND_W25Q80BV_8Mbit
+[SATA] enable SATA interface
+[SATA] spread-spectrum disable
+Factory: NOR
+Factory: pp:0, seq#:0x10, size:0x2800
+
+[*** Output truncated for brevity ***]
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpuset
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Initializing cgroup subsys cpuacct
+[    0.000000] Linux version 4.1.17 (build@build-yocto2) (gcc version 4.9.4 20150629 (prerelease) (Realtek ASDK64-4.9.4p1 Build 2285) ) #1 SMP PREEMPT Wed Jul 24 17:13:01 PDT 2019 (commit id:a61c128eddbd2d423fca8adfe4ee1c2aaa8ee6df)
+[    0.000000] CPU: AArch64 Processor [410fd034] revision 4
+</pre></div>
+
+
+<p>After startup completed, I arrived at a shell prompt as the root user:</p>
+<div class="highlight"><pre><span></span>root@yodaplus32_mini:/ #
+</pre></div>
+
+
+<p>So the UART gave me what I needed -- visibility into the startup process, and a shell for looking around the filesystem. It turns out the Ibi uses a two-stage U-Boot loading process and runs Android. There is no SSH server (or even a text editor) installed, so it's a pretty bare-bones OS installation.</p>
+<p>The bootup process indicates the CPU is a quad-core A53 ARM processor; looking at the board under the heatsink reveals a <a href="https://www.realtek.com/en/products/communications-network-ics/item/rtd1295">Realtek RTD1295 SoC</a>. Unfortunately, Linux kernel support for the Realtek RTD1295 is patchy, though work appears to be picking up in that area. Hopefully in the near future, it will be possible to boot a vanilla kernel on the Ibi and get a full Linux distro running on it, as opposed to a locked-down Android install.</p></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Chris Coffey (ccoff)
+    </span>
+  </span>
+<time datetime="2020-01-21T00:00:00+00:00" pubdate>Tue 21 January 2020</time>  <span class="categories">
+    <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a class="category" href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a class="category" href="https://ccoff.github.io/tag/uart">UART</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://ccoff.github.io/art-of-finding-uart">The art of finding a UART</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/repairing-lcd-monitor">Repairing an LCD monitor</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/a-modest-mouse">A modest mouse: Building a low-cost, head-mounted infrared pointing device</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/temperature-sensor-sdr-radio">Decoding temperature sensor data using software-defined radio</a>
+      </li>
+    </ul>
+  </section>
+  <!--
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
+    </ul>
+  </section>
+  -->
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy; 2020 Chris Coffey (ccoff) &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://ccoff.github.io/theme/js/ender.js"></script>
+  <script src="https://ccoff.github.io/theme/js/octopress.js" type="text/javascript"></script>
+</body>
+</html>

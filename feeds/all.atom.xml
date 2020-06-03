@@ -1,5 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>0xCC0FF</title><link href="https://ccoff.github.io/" rel="alternate"></link><link href="https://ccoff.github.io/feeds/all.atom.xml" rel="self"></link><id>https://ccoff.github.io/</id><updated>2020-01-21T00:00:00+00:00</updated><subtitle>A companion blog to my GitHub account</subtitle><entry><title>The art of finding a UART</title><link href="https://ccoff.github.io/art-of-finding-uart" rel="alternate"></link><published>2020-01-21T00:00:00+00:00</published><updated>2020-01-21T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-01-21:/art-of-finding-uart</id><summary type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi smartphone app, and that app requires a ridiculous amount of permissions -- you might as well install a backdoor on your phone. I wanted to see what made the Ibi tick, and if it could be customized.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>0xCC0FF</title><link href="https://ccoff.github.io/" rel="alternate"></link><link href="https://ccoff.github.io/feeds/all.atom.xml" rel="self"></link><id>https://ccoff.github.io/</id><updated>2020-04-26T00:00:00+01:00</updated><subtitle>A companion blog to my GitHub account</subtitle><entry><title>Customizing a live ISO image</title><link href="https://ccoff.github.io/customizing-live-iso-image" rel="alternate"></link><published>2020-04-26T00:00:00+01:00</published><updated>2020-04-26T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-04-26:/customizing-live-iso-image</id><summary type="html">&lt;p&gt;I have an &lt;a href="https://www.digital-loggers.com/api_faqs.html"&gt;Atomic Pi&lt;/a&gt; that I use as a NAS. Every now and then, I back up the on-board eMMC with &lt;em&gt;dd&lt;/em&gt;. To do this, I boot from a &lt;a href="https://www.debian.org/CD/live"&gt;live Debian image&lt;/a&gt; on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have an &lt;a href="https://www.digital-loggers.com/api_faqs.html"&gt;Atomic Pi&lt;/a&gt; that I use as a NAS. Every now and then, I back up the on-board eMMC with &lt;em&gt;dd&lt;/em&gt;. To do this, I boot from a &lt;a href="https://www.debian.org/CD/live"&gt;live Debian image&lt;/a&gt; on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though -- the live image waits for a keypress at the boot menu, and it doesn't start an SSH server. So there is no way to access it remotely.&lt;/p&gt;
+&lt;p&gt;I wanted to be able to plug in the live USB stick, boot the server, connect via SSH, and &lt;em&gt;dd&lt;/em&gt; the eMMC without having to connect other hardware. As it turns out, modifying the filesystem of a live ISO image is not difficult. The following procedure shows how to take a Debian live ISO file, unpack it, modify the filesystem, and pack it back up into a new, customized ISO file.&lt;/p&gt;
+&lt;p&gt;First, we create some working directories where we can extract and modify the ISO image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mdkir -p custom-iso/mnt
+mdkir -p custom-iso/iso
+mdkir -p custom-iso/squashfs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Next, we mount the Debian ISO image file to get to the files inside. (Below, it's mounted at &lt;em&gt;/media/d-live 10.4.0 st amd64&lt;/em&gt;.) We use &lt;em&gt;rsync&lt;/em&gt; to copy the files from there into the &lt;em&gt;custom-iso/iso&lt;/em&gt; directory. After that, we mount the ISO file's squashfs filesystem in the &lt;em&gt;custom-iso/mnt&lt;/em&gt; directory, and finally copy the unpacked contents of the squashed filesystem into the &lt;em&gt;custom-iso/squashfs&lt;/em&gt; directory:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cd custom-iso
+sudo rsync -a /media/d-live\ 10.4.0\ st\ amd64/ iso/
+sudo mount -o loop iso/live/filesystem.squashfs mnt
+sudo rsync -a mnt/ squashfs/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now that we have the squash filesystem extracted, we're ready to modify it. To do this, enter a chroot:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo chroot ./squashfs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we can make any changes we like. The following commands install an SSH server and configure it. Remember, this is all done &lt;em&gt;inside&lt;/em&gt; the chroot:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mount -t proc none /proc/
+mount -t sysfs none /sys/
+
+apt update
+apt install openssh-server
+
+# Set a root password:
+passwd
+
+# Add a regular user for SSH logins:
+sudo adduser sshuser
+
+# Configure sshd_config, make any other configuration changes here, etc.
+
+# Clean up after ourselves:
+rm -rf /tmp/*
+umount /proc/
+umount /sys/
+ rm ~/.bash_history
+ exit
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;(Note the leading space before the last two commands -- this ensures Bash doesn't save the commands in its history.)&lt;/p&gt;
+&lt;p&gt;At this point, we've modified the filesystem to what we want, but we still need to make a few more tweaks to the live configuration. The default Debian live ISO waits for the user to select an option during startup -- obviously that's a problem in a headless environment. We want the image to boot automatically with no intervention so we can get the all-important SSH server running. So we edit the &lt;em&gt;iso/boot/grub/grub.cfg&lt;/em&gt; file, and set a timeout (2 seconds here) for the boot menu:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;set timeout=2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We want to cover EFI and isolinux boot environments, so we edit the &lt;em&gt;iso/isolinux/isolinux.cfg&lt;/em&gt; file as well (here the time is specified in deciseconds):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;timeout 20
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That's it for the modifications. Now we're ready to build a new ISO file with our changes in it. First we need to install a few packages:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt install xorriso
+sudo apt install isolinux
+sudo apt install squashfs-tools
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we "re-squash" the filesystem and copy it back into the &lt;em&gt;iso/live&lt;/em&gt; directory:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo mksquashfs squashfs filesystem.squashfs
+cp filesystem.squashfs iso/live
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And finally, we build the new ISO file with the following lovely one-liner... We can change the &lt;strong&gt;-outdev&lt;/strong&gt; and &lt;strong&gt;-volid&lt;/strong&gt; options to whatever names we want for the filename and volume name:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
+-compliance no_emul_toc -map ./iso / -chmod 0755 / -- -boot_image isolinux dir=/isolinux \
+-boot_image isolinux system_area=/usr/lib/ISOLINUX/isohdpfx.bin -boot_image any next \
+-boot_image any efi_path=boot/grub/efi.img -boot_image isolinux partition_entry=gpt_basdat
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. Making disk image backups on a headless device is a lot easier now.&lt;/p&gt;</content><category term="linux"></category><category term="iso"></category><category term="live image"></category></entry><entry><title>The art of finding a UART</title><link href="https://ccoff.github.io/art-of-finding-uart" rel="alternate"></link><published>2020-01-21T00:00:00+00:00</published><updated>2020-01-21T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-01-21:/art-of-finding-uart</id><summary type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi smartphone app, and that app requires a ridiculous amount of permissions -- you might as well install a backdoor on your phone. I wanted to see what made the Ibi tick, and if it could be customized.&lt;/p&gt;
 &lt;p&gt;On the outside, the Ibi has a USB 3.0 port, power jack, and LED. There is no ethernet port, only WiFi, and no video output. Beyond that it's a black box (figuratively speaking, as it has a white case). What I needed was a serial &lt;a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter"&gt;UART&lt;/a&gt; (universal asynchronous receiver-transmitter) connection to see device startup messages and information about its configuration. Many routers, switches, and other embedded devices have some sort of UART capability for troubleshooting and diagnostic purposes, and I hoped the Ibi would be the same.&lt;/p&gt;
 &lt;p&gt;I opened up the case, and the Ibi's innards slid out easily enough. There was a main &lt;a href="https://en.wikipedia.org/wiki/Printed_circuit_board"&gt;PCB&lt;/a&gt; with the hard drive underneath:&lt;/p&gt;
 &lt;p&gt;&lt;img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" height="360" /&gt;&lt;/p&gt;

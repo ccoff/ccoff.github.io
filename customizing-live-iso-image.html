@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Customizing a live ISO image &mdash; 0xCC0FF</title>
+  <meta name="author" content="Chris Coffey (ccoff)">
+
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://ccoff.github.io/favicon.png" rel="icon">
+
+  <link href="https://ccoff.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://ccoff.github.io/">0xCC0FF</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
+    <li><a href="/pages/rss">RSS</a></li>
+      <li class="active">
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
+      </li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">Customizing a live ISO image</h1>
+    <p class="meta">
+<time datetime="2020-04-26T00:00:00+01:00" pubdate>Sun 26 April 2020</time>    </p>
+</header>
+
+  <div class="entry-content"><p>I have an <a href="https://www.digital-loggers.com/api_faqs.html">Atomic Pi</a> that I use as a NAS. Every now and then, I back up the on-board eMMC with <em>dd</em>. To do this, I boot from a <a href="https://www.debian.org/CD/live">live Debian image</a> on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though -- the live image waits for a keypress at the boot menu, and it doesn't start an SSH server. So there is no way to access it remotely.</p>
+<p>I wanted to be able to plug in the live USB stick, boot the server, connect via SSH, and <em>dd</em> the eMMC without having to connect other hardware. As it turns out, modifying the filesystem of a live ISO image is not difficult. The following procedure shows how to take a Debian live ISO file, unpack it, modify the filesystem, and pack it back up into a new, customized ISO file.</p>
+<p>First, we create some working directories where we can extract and modify the ISO image:</p>
+<div class="highlight"><pre><span></span>mdkir -p custom-iso/mnt
+mdkir -p custom-iso/iso
+mdkir -p custom-iso/squashfs
+</pre></div>
+
+
+<p>Next, we mount the Debian ISO image file to get to the files inside. (Below, it's mounted at <em>/media/d-live 10.4.0 st amd64</em>.) We use <em>rsync</em> to copy the files from there into the <em>custom-iso/iso</em> directory. After that, we mount the ISO file's squashfs filesystem in the <em>custom-iso/mnt</em> directory, and finally copy the unpacked contents of the squashed filesystem into the <em>custom-iso/squashfs</em> directory:</p>
+<div class="highlight"><pre><span></span>cd custom-iso
+sudo rsync -a /media/d-live\ 10.4.0\ st\ amd64/ iso/
+sudo mount -o loop iso/live/filesystem.squashfs mnt
+sudo rsync -a mnt/ squashfs/
+</pre></div>
+
+
+<p>Now that we have the squash filesystem extracted, we're ready to modify it. To do this, enter a chroot:</p>
+<div class="highlight"><pre><span></span>sudo chroot ./squashfs
+</pre></div>
+
+
+<p>Now we can make any changes we like. The following commands install an SSH server and configure it. Remember, this is all done <em>inside</em> the chroot:</p>
+<div class="highlight"><pre><span></span>mount -t proc none /proc/
+mount -t sysfs none /sys/
+
+apt update
+apt install openssh-server
+
+# Set a root password:
+passwd
+
+# Add a regular user for SSH logins:
+sudo adduser sshuser
+
+# Configure sshd_config, make any other configuration changes here, etc.
+
+# Clean up after ourselves:
+rm -rf /tmp/*
+umount /proc/
+umount /sys/
+ rm ~/.bash_history
+ exit
+</pre></div>
+
+
+<p>(Note the leading space before the last two commands -- this ensures Bash doesn't save the commands in its history.)</p>
+<p>At this point, we've modified the filesystem to what we want, but we still need to make a few more tweaks to the live configuration. The default Debian live ISO waits for the user to select an option during startup -- obviously that's a problem in a headless environment. We want the image to boot automatically with no intervention so we can get the all-important SSH server running. So we edit the <em>iso/boot/grub/grub.cfg</em> file, and set a timeout (2 seconds here) for the boot menu:</p>
+<div class="highlight"><pre><span></span>set timeout=2
+</pre></div>
+
+
+<p>We want to cover EFI and isolinux boot environments, so we edit the <em>iso/isolinux/isolinux.cfg</em> file as well (here the time is specified in deciseconds):</p>
+<div class="highlight"><pre><span></span>timeout 20
+</pre></div>
+
+
+<p>That's it for the modifications. Now we're ready to build a new ISO file with our changes in it. First we need to install a few packages:</p>
+<div class="highlight"><pre><span></span>sudo apt install xorriso
+sudo apt install isolinux
+sudo apt install squashfs-tools
+</pre></div>
+
+
+<p>Now we "re-squash" the filesystem and copy it back into the <em>iso/live</em> directory:</p>
+<div class="highlight"><pre><span></span>sudo mksquashfs squashfs filesystem.squashfs
+cp filesystem.squashfs iso/live
+</pre></div>
+
+
+<p>And finally, we build the new ISO file with the following lovely one-liner... We can change the <strong>-outdev</strong> and <strong>-volid</strong> options to whatever names we want for the filename and volume name:</p>
+<div class="highlight"><pre><span></span>xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
+-compliance no_emul_toc -map ./iso / -chmod 0755 / -- -boot_image isolinux dir=/isolinux \
+-boot_image isolinux system_area=/usr/lib/ISOLINUX/isohdpfx.bin -boot_image any next \
+-boot_image any efi_path=boot/grub/efi.img -boot_image isolinux partition_entry=gpt_basdat
+</pre></div>
+
+
+<p>When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. Making disk image backups on a headless device is a lot easier now.</p></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Chris Coffey (ccoff)
+    </span>
+  </span>
+<time datetime="2020-04-26T00:00:00+01:00" pubdate>Sun 26 April 2020</time>  <span class="categories">
+    <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://ccoff.github.io/tag/linux">linux</a>,    <a class="category" href="https://ccoff.github.io/tag/iso">iso</a>,    <a class="category" href="https://ccoff.github.io/tag/live-image">live image</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://ccoff.github.io/customizing-live-iso-image">Customizing a live ISO image</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/art-of-finding-uart">The art of finding a UART</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/repairing-lcd-monitor">Repairing an LCD monitor</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/a-modest-mouse">A modest mouse: Building a low-cost, head-mounted infrared pointing device</a>
+      </li>
+    </ul>
+  </section>
+  <!--
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
+    </ul>
+  </section>
+  -->
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy; 2020 Chris Coffey (ccoff) &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://ccoff.github.io/theme/js/ender.js"></script>
+  <script src="https://ccoff.github.io/theme/js/octopress.js" type="text/javascript"></script>
+</body>
+</html>

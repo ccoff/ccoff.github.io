@@ -101,5 +101,5 @@ xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ a
 -boot_image any efi_path=boot/grub/efi.img -boot_image isolinux partition_entry=gpt_basdat
 ```
 
-When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. Making disk image backups on a headless device is a lot easier now.
+When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. And making disk image backups on a headless device is much easier now.
 

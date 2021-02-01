@@ -11,9 +11,9 @@ I wanted to be able to plug in the live USB stick, boot the server, connect via 
 First, we create some working directories where we can extract and modify the ISO image:
 
 ```text
-mdkir -p custom-iso/mnt
-mdkir -p custom-iso/iso
-mdkir -p custom-iso/squashfs
+mkdir -p custom-iso/mnt
+mkdir -p custom-iso/iso
+mkdir -p custom-iso/squashfs
 ```
 
 Next, we mount the Debian ISO image file to get to the files inside. (Below, it's mounted at */media/d-live 10.4.0 st amd64*.) We use *rsync* to copy the files from there into the *custom-iso/iso* directory. After that, we mount the ISO file's squashfs filesystem in the *custom-iso/mnt* directory, and finally copy the unpacked contents of the squashed filesystem into the *custom-iso/squashfs* directory:
@@ -25,13 +25,19 @@ sudo mount -o loop iso/live/filesystem.squashfs mnt
 sudo rsync -a mnt/ squashfs/
 ```
 
-Now that we have the squash filesystem extracted, we're ready to modify it. To do this, enter a chroot:
+We have the squash filesystem extracted, and we're ready to modify it. Before we enter a chroot to do that though, let's copy the current *resolv.conf* to make sure networking works correctly:
+
+```text
+sudo cp /etc/resolv.conf squashfs/etc
+```
+
+Now we can enter the chroot:
 
 ```text
 sudo chroot ./squashfs
 ```
 
-Now we can make any changes we like. The following commands install an SSH server and configure it. Remember, this is all done *inside* the chroot:
+We can make any changes we like in here. The following commands install an SSH server, configure it, and clean up. Remember, this is all done *inside* the chroot:
 
 ```text
 mount -t proc none /proc/
@@ -49,6 +55,7 @@ sudo adduser sshuser
 # Configure sshd_config, make any other configuration changes here, etc.
 
 # Clean up after ourselves:
+apt clean
 rm -rf /tmp/*
 umount /proc/
 umount /sys/
@@ -78,7 +85,7 @@ sudo apt install isolinux
 sudo apt install squashfs-tools
 ```
 
-Now we "re-squash" the filesystem and copy it back into the *iso/live* directory:
+Next we "re-squash" the filesystem and copy it back into the *iso/live* directory:
 
 ```text
 sudo mksquashfs squashfs filesystem.squashfs

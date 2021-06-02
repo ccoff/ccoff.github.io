@@ -181,12 +181,22 @@ cp filesystem.squashfs iso/live
 &lt;p&gt;When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. And making disk image backups on a headless device is much easier now.&lt;/p&gt;</content><category term="linux"></category><category term="iso"></category><category term="live image"></category></entry><entry><title>The art of finding a UART</title><link href="https://ccoff.github.io/art-of-finding-uart" rel="alternate"></link><published>2020-01-21T00:00:00+00:00</published><updated>2020-01-21T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-01-21:/art-of-finding-uart</id><summary type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi smartphone app, and that app requires a ridiculous amount of permissions -- you might as well install a backdoor on your phone. I wanted to see what made the Ibi tick, and if it could be customized.&lt;/p&gt;
 &lt;p&gt;On the outside, the Ibi has a USB 3.0 port, power jack, and LED. There is no ethernet port, only WiFi, and no video output. Beyond that it's a black box (figuratively speaking, as it has a white case). What I needed was a serial &lt;a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter"&gt;UART&lt;/a&gt; (universal asynchronous receiver-transmitter) connection to see device startup messages and information about its configuration. Many routers, switches, and other embedded devices have some sort of UART capability for troubleshooting and diagnostic purposes, and I hoped the Ibi would be the same.&lt;/p&gt;
 &lt;p&gt;I opened up the case, and the Ibi's innards slid out easily enough. There was a main &lt;a href="https://en.wikipedia.org/wiki/Printed_circuit_board"&gt;PCB&lt;/a&gt; with the hard drive underneath:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" height="360" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/ibi-main-pcb.jpg"&gt;&lt;img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;That 4-pin header (circled) looks interesting...&lt;/figcaption&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;Of most interest was the 4-pin header at J1 (circled in the image above), which I suspected was a UART. With the Ibi powered off, I used a multimeter to test J1's pins for ground, which turned out to be pin 4. Pins 2 and 3 had thin traces on the back of the PCB running towards the &lt;a href="https://en.wikipedia.org/wiki/System_on_a_chip"&gt;SoC&lt;/a&gt; (see arrows in the image below). These were quite likely the transmit (TX) and receive (RX) pins: &lt;/p&gt;
-&lt;p&gt;&lt;img src="images/ibi-uart-traces.jpg" alt="Image: J1 header, pins 2 and 3 traces" width="480" height="360" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/ibi-uart-traces.jpg"&gt;&lt;img src="images/ibi-uart-traces.jpg" alt="Image: J1 header, pins 2 and 3 traces" width="480" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;So pin 1 remained as the likely candidate for power (VCC). I powered up the device several times, measuring the voltage on pins 1, 2, and 3. Pins 1 and 3 remained steady at 3.3V, but the voltage on pin 2 fluctuated during startup. This was probably the TX pin shoveling out serial data.&lt;/p&gt;
 &lt;p&gt;Based on all of this information, at this point I was pretty confident that pin 1 = VCC, pin 2 = TX, pin 3 = RX, and 4 = GND. Before I hooked up my USB-UART adapter though, I used a logic analyzer to confirm my hypothesis. The analyzer's parser showed that there was indeed outgoing data that it could decode on pin 2:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/ibi-saleae-capture.png" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" height="349"/&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/ibi-saleae-capture.jpg"&gt;&lt;img src="images/ibi-saleae-capture.jpg" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;Next, I connected the USB-UART adapter and started &lt;em&gt;screen&lt;/em&gt; at the standard 115200 baud rate:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;screen /dev/ttyUSB0 115200
 &lt;/pre&gt;&lt;/div&gt;
@@ -249,9 +259,15 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;Web searching indicated that &lt;a href="https://superuser.com/questions/729741/dell-u2311h-monitor-gone-bad-which-capacitors-do-i-replace"&gt;certain Dell …&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have an old &lt;a href="https://www.dell.com/support/home/us/en/19/product-support/product/dell-e2014h/docs"&gt;Dell E2014H 20" monitor&lt;/a&gt; that recently started having issues: when I turned it on, the power LED blinked on and off over and over, and the screen remained blank. So the monitor was getting power, but something was amiss somewhere.&lt;/p&gt;
 &lt;p&gt;Web searching indicated that &lt;a href="https://superuser.com/questions/729741/dell-u2311h-monitor-gone-bad-which-capacitors-do-i-replace"&gt;certain Dell monitors were prone to blown capacitors&lt;/a&gt;, which can lead to the symptoms I was seeing. In some cases, people had been able to replace the capacitors on the power supply board and restore the monitor to normal working order.&lt;/p&gt;
 &lt;p&gt;I had nothing to lose and figured it was worth a shot. The first step was to disassemble the monitor, which was the hardest part by far of the entire process. Specifically, prying the bezel from the front of the monitor took some doing -- an old &lt;a href="https://en.wikipedia.org/wiki/Oyster_card"&gt;London transit card&lt;/a&gt; I had laying around proved to be the best tool for this. In any event, after some careful disassembly at last I had unrestricted access to the power supply board:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" height="360" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/monitor-power-supply-board.jpg"&gt;&lt;img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;Sure enough, there were three blown capacitors exhibiting the telltale bulging "dome" top and residue:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" height="360" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/monitor-power-supply-board-closeup.jpg"&gt;&lt;img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;I figured I might as well replace all of the power supply capacitors while I had the monitor disassembled. There were four different types of capacitors on the power supply board:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;470 mF, 16 V (these were the three blown caps)&lt;/li&gt;
@@ -262,7 +278,11 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;In addition, the capacitors needed to have low &lt;a href="https://en.wikipedia.org/wiki/Equivalent_series_resistance"&gt;ESR&lt;/a&gt;, high &lt;a href="https://en.wikipedia.org/wiki/Ripple_(electrical)"&gt;ripple current&lt;/a&gt;, and be rated for high temperature.&lt;/p&gt;
 &lt;p&gt;I was able to find them all with the exception of the 4.7 mF, 100 V which despite my best efforts I could not locate anywhere. Still, for less than $10 US I had high-quality Panasonic capacitors (from &lt;a href="https://www.mouser.com"&gt;mouser.com&lt;/a&gt;) that I could use to replace all of the existing capacitors except the elusive 4.7 mF, 100 V.&lt;/p&gt;
 &lt;p&gt;I removed the old capacitors and soldered the new ones on the power supply board. I then reassembled the monitor, and the moment of truth arrived. I plugged in the power cord and - boom! - it powered up without a hitch:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/monitor-working.jpg" alt="Image: Monitor working" width="480" height="360" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/monitor-working.jpg"&gt;&lt;img src="images/monitor-working.jpg" alt="Image: Monitor working" width="600" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Success!&lt;/figcaption&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;So with less than $10 of parts I was able to reclaim a monitor otherwise destined to become e-waste.&lt;/p&gt;</content><category term="hardware"></category><category term="repair"></category><category term="monitor"></category></entry><entry><title>Preserving IMAP keywords during e-mail migrations</title><link href="https://ccoff.github.io/preserving-imap-keywords" rel="alternate"></link><published>2018-08-27T00:00:00+01:00</published><updated>2018-08-27T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2018-08-27:/preserving-imap-keywords</id><summary type="html">&lt;p&gt;Recently I had to migrate several e-mail accounts from one server to another. Some of the accounts were quite large; one had over 20,000 messages in it. I tried a few IMAP migration tools, but they all had some issue or another -- one would hang after a few thousand …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had to migrate several e-mail accounts from one server to another. Some of the accounts were quite large; one had over 20,000 messages in it. I tried a few IMAP migration tools, but they all had some issue or another -- one would hang after a few thousand messages, while another one skipped messages here and there, seemingly at random.&lt;/p&gt;
 &lt;p&gt;Searching GitHub, I came across &lt;a href="https://github.com/wrzlbrmft/imapcopy"&gt;Imapcopy&lt;/a&gt;, a PHP-based IMAP migration script that didn't have a lot of extra bells and whistles. It appeared to just "do one thing and do it well" -- get all of the messages from one server to the other. In my testing, it worked well in almost every way; it was stable, fast, and didn't skip any messages. Unfortunately, however, it didn't preserve IMAP keywords.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;IMAP keywords&lt;/strong&gt;, also known as &lt;strong&gt;custom flags&lt;/strong&gt; or &lt;strong&gt;tags&lt;/strong&gt;, are user-defined labels that you can assign to messages. Messages can have more than one keyword associated with them, allowing for multi-dimensional sorting. For example, you could define "Personal", "Family", and "Friends" keywords, and assign them interchangeably to messages and sort accordingly. Additionally, many e-mail clients use some sort of visual indicator (e.g., color) to differentiate messages by keyword, allowing you to rapidly scan an inbox and see what types of messages it contains.&lt;/p&gt;
@@ -279,23 +299,54 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;It got me thinking about building a head-based IR pointing device on the cheap. I considered a design similar to the SmartNav, but I wasn't excited about shining IR LEDs into my eyes for long periods of time. Supposedly the SmartNav has filters to handle this, but I didn't want to take the risk with my own setup. So instead of the transmitter beaming IR towards the head (as the SmartNav does), my head would be the 'platform' for the IR transmitter, and the computer would be the IR receiver.&lt;/p&gt;
 &lt;h2&gt;Hardware&lt;/h2&gt;
 &lt;p&gt;First I needed something that could detect IR on the computer's side. I had a cheap webcam lying around:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-cheap-webcam.jpg"&gt;&lt;img src="images/mouse-cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;I did the tried-and-true test of pressing a button on a TV remote and looking at the resultant image captured by the webcam:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-webcam-ir-test.jpg"&gt;&lt;img src="images/mouse-webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;No problem there: the camera could 'see' in infrared. In fact every webcam I tested (four in total) detected IR. &lt;/p&gt;
 &lt;p&gt;Next up was the IR transmitter. It needed to be head-mounted, and comfortable. A modifiable headlamp seemed the way to go. As a proof-of-concept first though, I put together a dead-simple, battery-powered IR LED 'transmitter' on a breadboard:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-breadboard-proof-of-concept.jpg"&gt;&lt;img src="images/mouse-breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;The webcam detected it easily, and basic software tracking using &lt;a href="https://www.opencv.org"&gt;OpenCV&lt;/a&gt; looked promising (more on this below). Stray IR and light from windows, overhead lighting, and other sources was a problem though. I needed a pass filter for IR wavelengths that I could put over the webcam lens, and &lt;a href="https://www.aliexpress.com/item/9mm-Filter-Lens-Filtering-against-400nm-750nm-Pass-808nm-1064nm-IR-InfraRed-Laser-Only/32278589551.html"&gt;this 808nm-1064nm wavelength IR pass filter&lt;/a&gt; seemed the perfect size at 9mm diameter:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-ir-pass-filter.jpg"&gt;&lt;img src="images/mouse-ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;And here is the filter covering the webcam lens:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-cheap-webcam-with-ir-filter.jpg"&gt;&lt;img src="images/mouse-cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;The filter dramatically reduced unwanted light from reaching the camera. I could now reliably detect and track the IR transmitter beam in various conditions: sunlight coming through open curtains, overhead lights on, etc.&lt;/p&gt;
 &lt;p&gt;It was time to spend some money on a 'real' IR transmitter. I needed a headlamp with LEDs that I could modify, and &lt;a href="https://www.amazon.com/Headlamp-Headlight-Battery-Batteries-Included/dp/B005FEGYJC"&gt;this one on Amazon&lt;/a&gt; seemed to fit the bill. &lt;/p&gt;
 &lt;p&gt;Disassembling the lamp was easy: twist the lens cap, remove a holding bracket, and unscrew the circuit board containing the LEDs:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/mouse-headlamp-disassembly-1.jpg"&gt;&lt;img src="images/mouse-headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Headlamp with lens cap removed.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+&lt;a href="images/mouse-headlamp-disassembly-2.jpg"&gt;&lt;img src="images/mouse-headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Headlamp with circuit board removed.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+&lt;a href="images/mouse-headlamp-disassembly-3.jpg"&gt;&lt;img src="images/mouse-headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Headlamp with back side of circuit board exposed.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+&lt;a href="images/mouse-headlamp-disassembly-4.jpg"&gt;&lt;img src="images/mouse-headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Headlamp with side view of circuit board.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;The lamp has four lighting modes: three levels of white light brightness (2 LEDs, 10 LEDs, and 18 LEDs), and a red light flashing mode. I de-soldered the two LEDs in the center that provide the lowest white light level, and soldered two &lt;a href="https://uk.rs-online.com/web/p/ir-leds/6997663"&gt;890nm IR LEDs&lt;/a&gt; in their place. (If you do this yourself, remember that LEDs are diodes, and the positive / negative terminals need to be soldered in the correct orientation. Look at the other LEDs on the board to determine which way they should go.)&lt;/p&gt;
 &lt;p&gt;I put everything back together and tested the headlamp with the IR webcam receiver. It worked brilliantly (pun intended) -- one push of the power button turned on the IR LEDs, another push enabled medium white light, another push enabled high white light, another push enabled red flashing, and a final push turned the lamp off.&lt;/p&gt;
 &lt;p&gt;I now had a functioning head-mounted IR transmitter that still worked as a "normal" headlamp if necessary.&lt;/p&gt;
@@ -318,9 +369,15 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;h2&gt;Final thoughts&lt;/h2&gt;
 &lt;p&gt;So now that I have this setup, have I ditched the touchpad? No, not completely. You have to wear a headlamp on your head, which can get cumbersome. A logical next step would be to try and remove the headlamp / IR pass filter from the mix completely, and just detect head or eye movement directly, perhaps by using &lt;a href="https://docs.opencv.org/2.4/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html"&gt;OpenCV's CascadeClassifiers&lt;/a&gt;. (Hacking a headlamp is a lot more fun though!)&lt;/p&gt;
 &lt;p&gt;In any event, I hope this project helps and inspires others who are looking for a low-cost, assistive technology pointing device.&lt;/p&gt;</content><category term="accessibility"></category><category term="hci"></category><category term="opencv"></category><category term="python"></category></entry><entry><title>Decoding temperature sensor data using software-defined radio</title><link href="https://ccoff.github.io/temperature-sensor-sdr-radio" rel="alternate"></link><published>2017-12-16T00:00:00+00:00</published><updated>2017-12-16T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2017-12-16:/temperature-sensor-sdr-radio</id><summary type="html">&lt;p&gt;I have an old Philips clock radio that includes a standalone temperature sensor module:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/philips_bottom.jpg" alt="Image: Philips outdoor temperature sensor" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/temp-sdr-philips-bottom.jpg"&gt;&lt;img src="images/temp-sdr-philips-bottom.jpg" alt="Image: Philips outdoor temperature sensor, bottom view" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;The idea is that you place this sensor outdoors, where it periodically sends temperature updates to the clock radio inside. I wanted to capture those transmissions and use the data programmatically, instead of just seeing it …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have an old Philips clock radio that includes a standalone temperature sensor module:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/philips_bottom.jpg" alt="Image: Philips outdoor temperature sensor" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/temp-sdr-philips-bottom.jpg"&gt;&lt;img src="images/temp-sdr-philips-bottom.jpg" alt="Image: Philips outdoor temperature sensor, bottom view" width="320" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;The idea is that you place this sensor outdoors, where it periodically sends temperature updates to the clock radio inside. I wanted to capture those transmissions and use the data programmatically, instead of just seeing it displayed on the clock radio. It occurred to me that a radio receiver ought to be able to pick up these transmissions.&lt;/p&gt;
 &lt;p&gt;I have several software-defined radio (SDR) USB dongles (such as &lt;a href="https://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"&gt;this&lt;/a&gt; and &lt;a href="https://www.aliexpress.com/item/Mini-Portable-Digital-USB-2-0-TV-Stick-DVB-T-DAB-FM-RTL2832U-R820T2-Support-SDR/32914826153.html"&gt;this&lt;/a&gt;). It's pretty amazing what you can do with these low-cost devices, which generally have a range of around 25 MHz to 1.75 GHz. Beyond the obvious radio and TV broadcasts, I've picked up aircraft (&lt;a href="https://en.wikipedia.org/wiki/ACARS"&gt;ACARS&lt;/a&gt;) transmissions, weather data, pager and GSM traffic, and more. So I thought SDR might be a good way to see what this temperature sensor was sending to the clock radio.&lt;/p&gt;
 &lt;p&gt;I had no idea what frequency the temperature sensor used, but the &lt;a href="https://en.wikipedia.org/wiki/ISM_band"&gt;ISM band&lt;/a&gt; seemed like a good place to start investigating, as many consumer-grade devices transmit around 433 MHz. The excellent and popular &lt;a href="https://github.com/merbanan/rtl_433"&gt;rtl_433 project&lt;/a&gt; supports a large number of 433 MHz devices, enabling you to decode protocols and output data in a number of formats (JSON, CSV, etc.).&lt;/p&gt;
@@ -334,7 +391,10 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;The data packet was 36 bits long and repeated three times (with an extra starting nibble -- probably a sync signal of some sort -- on the first data row). rtl_433 couldn't decode anything from the data, which wasn't too surprising -- there are many, many types of sensors out there, each with their own proprietary format. If I wanted to make use of my sensor, I would have to reverse-engineer the protocol and write a decoder myself.&lt;/p&gt;
 &lt;h2&gt;Reverse-engineering the protocol&lt;/h2&gt;
 &lt;p&gt;First I had to determine the signal's timings. I loaded up a captured signal in Audacity:&lt;/p&gt;
-&lt;p&gt;&lt;img src="images/audacity-sample.png" alt="Image: Sample loaded in Audacity" width="640" height="270" /&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/temp-sdr-audacity-sample.png"&gt;&lt;img src="images/temp-sdr-audacity-sample.png" alt="Image: Sample loaded in Audacity" width="640" /&gt;&lt;/a&gt;
+&lt;/figure&gt;
+
 &lt;p&gt;This showed a good, strong signal, with the long and short pulses clearly visible; the temperature sensor was using &lt;a href="https://en.wikipedia.org/wiki/Pulse-width_modulation"&gt;pulse-width modulation (PWM)&lt;/a&gt;. With Audacity's selection tools, I could precisely determine the timings for the pulse and gap widths.&lt;/p&gt;
 &lt;p&gt;With that done, I could work on the protocol data itself. I knew the temperature sensor reported at least the following information:&lt;/p&gt;
 &lt;ul&gt;

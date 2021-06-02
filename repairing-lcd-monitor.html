@@ -73,9 +73,15 @@
   <div class="entry-content"><p>I have an old <a href="https://www.dell.com/support/home/us/en/19/product-support/product/dell-e2014h/docs">Dell E2014H 20" monitor</a> that recently started having issues: when I turned it on, the power LED blinked on and off over and over, and the screen remained blank. So the monitor was getting power, but something was amiss somewhere.</p>
 <p>Web searching indicated that <a href="https://superuser.com/questions/729741/dell-u2311h-monitor-gone-bad-which-capacitors-do-i-replace">certain Dell monitors were prone to blown capacitors</a>, which can lead to the symptoms I was seeing. In some cases, people had been able to replace the capacitors on the power supply board and restore the monitor to normal working order.</p>
 <p>I had nothing to lose and figured it was worth a shot. The first step was to disassemble the monitor, which was the hardest part by far of the entire process. Specifically, prying the bezel from the front of the monitor took some doing -- an old <a href="https://en.wikipedia.org/wiki/Oyster_card">London transit card</a> I had laying around proved to be the best tool for this. In any event, after some careful disassembly at last I had unrestricted access to the power supply board:</p>
-<p><img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" height="360" /></p>
+<figure>
+<a href="images/monitor-power-supply-board.jpg"><img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" /></a>
+</figure>
+
 <p>Sure enough, there were three blown capacitors exhibiting the telltale bulging "dome" top and residue:</p>
-<p><img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" height="360" /></p>
+<figure>
+<a href="images/monitor-power-supply-board-closeup.jpg"><img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" /></a>
+</figure>
+
 <p>I figured I might as well replace all of the power supply capacitors while I had the monitor disassembled. There were four different types of capacitors on the power supply board:</p>
 <ul>
 <li>470 mF, 16 V (these were the three blown caps)</li>
@@ -86,7 +92,11 @@
 <p>In addition, the capacitors needed to have low <a href="https://en.wikipedia.org/wiki/Equivalent_series_resistance">ESR</a>, high <a href="https://en.wikipedia.org/wiki/Ripple_(electrical)">ripple current</a>, and be rated for high temperature.</p>
 <p>I was able to find them all with the exception of the 4.7 mF, 100 V which despite my best efforts I could not locate anywhere. Still, for less than $10 US I had high-quality Panasonic capacitors (from <a href="https://www.mouser.com">mouser.com</a>) that I could use to replace all of the existing capacitors except the elusive 4.7 mF, 100 V.</p>
 <p>I removed the old capacitors and soldered the new ones on the power supply board. I then reassembled the monitor, and the moment of truth arrived. I plugged in the power cord and - boom! - it powered up without a hitch:</p>
-<p><img src="images/monitor-working.jpg" alt="Image: Monitor working" width="480" height="360" /></p>
+<figure>
+<a href="images/monitor-working.jpg"><img src="images/monitor-working.jpg" alt="Image: Monitor working" width="600" /></a>
+<figcaption>Success!</figcaption>
+</figure>
+
 <p>So with less than $10 of parts I was able to reclaim a monitor otherwise destined to become e-waste.</p></div>
     <footer>
 <p class="meta">

@@ -76,23 +76,54 @@
 <p>It got me thinking about building a head-based IR pointing device on the cheap. I considered a design similar to the SmartNav, but I wasn't excited about shining IR LEDs into my eyes for long periods of time. Supposedly the SmartNav has filters to handle this, but I didn't want to take the risk with my own setup. So instead of the transmitter beaming IR towards the head (as the SmartNav does), my head would be the 'platform' for the IR transmitter, and the computer would be the IR receiver.</p>
 <h2>Hardware</h2>
 <p>First I needed something that could detect IR on the computer's side. I had a cheap webcam lying around:</p>
-<p><img src="images/cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-cheap-webcam.jpg"><img src="images/mouse-cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" /></a>
+</figure>
+
 <p>I did the tried-and-true test of pressing a button on a TV remote and looking at the resultant image captured by the webcam:</p>
-<p><img src="images/webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-webcam-ir-test.jpg"><img src="images/mouse-webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" /></a>
+</figure>
+
 <p>No problem there: the camera could 'see' in infrared. In fact every webcam I tested (four in total) detected IR. </p>
 <p>Next up was the IR transmitter. It needed to be head-mounted, and comfortable. A modifiable headlamp seemed the way to go. As a proof-of-concept first though, I put together a dead-simple, battery-powered IR LED 'transmitter' on a breadboard:</p>
-<p><img src="images/breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-breadboard-proof-of-concept.jpg"><img src="images/mouse-breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" /></a>
+</figure>
+
 <p>The webcam detected it easily, and basic software tracking using <a href="https://www.opencv.org">OpenCV</a> looked promising (more on this below). Stray IR and light from windows, overhead lighting, and other sources was a problem though. I needed a pass filter for IR wavelengths that I could put over the webcam lens, and <a href="https://www.aliexpress.com/item/9mm-Filter-Lens-Filtering-against-400nm-750nm-Pass-808nm-1064nm-IR-InfraRed-Laser-Only/32278589551.html">this 808nm-1064nm wavelength IR pass filter</a> seemed the perfect size at 9mm diameter:</p>
-<p><img src="images/ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-ir-pass-filter.jpg"><img src="images/mouse-ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" /></a>
+</figure>
+
 <p>And here is the filter covering the webcam lens:</p>
-<p><img src="images/cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-cheap-webcam-with-ir-filter.jpg"><img src="images/mouse-cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" /></a>
+</figure>
+
 <p>The filter dramatically reduced unwanted light from reaching the camera. I could now reliably detect and track the IR transmitter beam in various conditions: sunlight coming through open curtains, overhead lights on, etc.</p>
 <p>It was time to spend some money on a 'real' IR transmitter. I needed a headlamp with LEDs that I could modify, and <a href="https://www.amazon.com/Headlamp-Headlight-Battery-Batteries-Included/dp/B005FEGYJC">this one on Amazon</a> seemed to fit the bill. </p>
 <p>Disassembling the lamp was easy: twist the lens cap, remove a holding bracket, and unscrew the circuit board containing the LEDs:</p>
-<p><img src="images/headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /></p>
-<p><img src="images/headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /></p>
-<p><img src="images/headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /></p>
-<p><img src="images/headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /></p>
+<figure>
+<a href="images/mouse-headlamp-disassembly-1.jpg"><img src="images/mouse-headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /></a>
+<figcaption>Headlamp with lens cap removed.</figcaption>
+</figure>
+
+<figure>
+<a href="images/mouse-headlamp-disassembly-2.jpg"><img src="images/mouse-headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /></a>
+<figcaption>Headlamp with circuit board removed.</figcaption>
+</figure>
+
+<figure>
+<a href="images/mouse-headlamp-disassembly-3.jpg"><img src="images/mouse-headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /></a>
+<figcaption>Headlamp with back side of circuit board exposed.</figcaption>
+</figure>
+
+<figure>
+<a href="images/mouse-headlamp-disassembly-4.jpg"><img src="images/mouse-headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /></a>
+<figcaption>Headlamp with side view of circuit board.</figcaption>
+</figure>
+
 <p>The lamp has four lighting modes: three levels of white light brightness (2 LEDs, 10 LEDs, and 18 LEDs), and a red light flashing mode. I de-soldered the two LEDs in the center that provide the lowest white light level, and soldered two <a href="https://uk.rs-online.com/web/p/ir-leds/6997663">890nm IR LEDs</a> in their place. (If you do this yourself, remember that LEDs are diodes, and the positive / negative terminals need to be soldered in the correct orientation. Look at the other LEDs on the board to determine which way they should go.)</p>
 <p>I put everything back together and tested the headlamp with the IR webcam receiver. It worked brilliantly (pun intended) -- one push of the power button turned on the IR LEDs, another push enabled medium white light, another push enabled high white light, another push enabled red flashing, and a final push turned the lamp off.</p>
 <p>I now had a functioning head-mounted IR transmitter that still worked as a "normal" headlamp if necessary.</p>

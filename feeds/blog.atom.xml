@@ -72,7 +72,7 @@ I used a bunch of telescopic antennas (eight total) for the dipoles and reflecto
 &lt;figcaption&gt;NOAA-19 pass, May 8, 2021 at 08:08 UTC, maximum elevation 40 degrees. Note the storm heading towards Ireland. Click the image for the full-resolution picture.&lt;/figcaption&gt;
 &lt;/figure&gt;
 
-&lt;p&gt;WXtoImg has numerous imagery enhancements to choose from -- this is the thermal filter:&lt;/p&gt;
+&lt;p&gt;WXtoImg has numerous imagery enhancements to choose from -- this is a pass with the thermal filter applied:&lt;/p&gt;
 &lt;figure&gt;
 &lt;a href="images/wxsat-noaa-18-2021-05-27.jpg"&gt;&lt;img src="images/wxsat-noaa-18-2021-05-27.jpg" alt="Image: NOAA-18 satellite pass" width="520" /&gt;&lt;/a&gt;
 &lt;figcaption&gt;NOAA-18 pass, May 27, 2021 at 10:25 UTC, maximum elevation 75 degrees. Blue represents cold temperatures, red represents hot temperatures. Click the image for the full-resolution picture.&lt;/figcaption&gt;

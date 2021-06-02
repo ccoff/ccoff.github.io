@@ -97,7 +97,7 @@ I caught some more passes, adding an [LNA (low-noise amplifier)](https://en.wiki
 <figcaption>NOAA-19 pass, May 8, 2021 at 08:08 UTC, maximum elevation 40 degrees. Note the storm heading towards Ireland. Click the image for the full-resolution picture.</figcaption>
 </figure>
 
-WXtoImg has numerous imagery enhancements to choose from -- this is the thermal filter:
+WXtoImg has numerous imagery enhancements to choose from -- this is a pass with the thermal filter applied:
 
 <figure>
 <a href="images/wxsat-noaa-18-2021-05-27.jpg"><img src="images/wxsat-noaa-18-2021-05-27.jpg" alt="Image: NOAA-18 satellite pass" width="520" /></a>

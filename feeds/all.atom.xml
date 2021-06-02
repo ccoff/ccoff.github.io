@@ -194,7 +194,7 @@ cp filesystem.squashfs iso/live
 &lt;p&gt;So pin 1 remained as the likely candidate for power (VCC). I powered up the device several times, measuring the voltage on pins 1, 2, and 3. Pins 1 and 3 remained steady at 3.3V, but the voltage on pin 2 fluctuated during startup. This was probably the TX pin shoveling out serial data.&lt;/p&gt;
 &lt;p&gt;Based on all of this information, at this point I was pretty confident that pin 1 = VCC, pin 2 = TX, pin 3 = RX, and 4 = GND. Before I hooked up my USB-UART adapter though, I used a logic analyzer to confirm my hypothesis. The analyzer's parser showed that there was indeed outgoing data that it could decode on pin 2:&lt;/p&gt;
 &lt;figure&gt;
-&lt;a href="images/ibi-saleae-capture.jpg"&gt;&lt;img src="images/ibi-saleae-capture.jpg" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /&gt;&lt;/a&gt;
+&lt;a href="images/ibi-saleae-capture.png"&gt;&lt;img src="images/ibi-saleae-capture.png" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /&gt;&lt;/a&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;Next, I connected the USB-UART adapter and started &lt;em&gt;screen&lt;/em&gt; at the standard 115200 baud rate:&lt;/p&gt;

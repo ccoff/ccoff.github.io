@@ -39,7 +39,7 @@ DEFAULT_PAGINATION = 10
 RELATIVE_URLS = True
 # https://github.com/duilio/pelican-octopress-theme
 THEME = 'themes/pelican-octopress-theme'
-STATIC_PATHS = ['images']
+STATIC_PATHS = ['audio','images']
 # Post date will be from file timestamp. To set a specific date, use 'Date:' in
 # the metadata:
 DEFAULT_DATE = 'fs'

@@ -10,17 +10,24 @@ On the outside, the Ibi has a USB 3.0 port, power jack, and LED. There is no eth
 
 I opened up the case, and the Ibi's innards slid out easily enough. There was a main [PCB](https://en.wikipedia.org/wiki/Printed_circuit_board) with the hard drive underneath:
 
-<img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" height="360" />
+<figure>
+<a href="images/ibi-main-pcb.jpg"><img src="images/ibi-main-pcb.jpg" alt="Image: Ibi main PCB" width="480" /></a>
+<figcaption>That 4-pin header (circled) looks interesting...</figcaption>
+</figure>
 
 Of most interest was the 4-pin header at J1 (circled in the image above), which I suspected was a UART. With the Ibi powered off, I used a multimeter to test J1's pins for ground, which turned out to be pin 4. Pins 2 and 3 had thin traces on the back of the PCB running towards the [SoC](https://en.wikipedia.org/wiki/System_on_a_chip) (see arrows in the image below). These were quite likely the transmit (TX) and receive (RX) pins: 
 
-<img src="images/ibi-uart-traces.jpg" alt="Image: J1 header, pins 2 and 3 traces" width="480" height="360" />
+<figure>
+<a href="images/ibi-uart-traces.jpg"><img src="images/ibi-uart-traces.jpg" alt="Image: J1 header, pins 2 and 3 traces" width="480" /></a>
+</figure>
 
 So pin 1 remained as the likely candidate for power (VCC). I powered up the device several times, measuring the voltage on pins 1, 2, and 3. Pins 1 and 3 remained steady at 3.3V, but the voltage on pin 2 fluctuated during startup. This was probably the TX pin shoveling out serial data.
 
 Based on all of this information, at this point I was pretty confident that pin 1 = VCC, pin 2 = TX, pin 3 = RX, and 4 = GND. Before I hooked up my USB-UART adapter though, I used a logic analyzer to confirm my hypothesis. The analyzer's parser showed that there was indeed outgoing data that it could decode on pin 2:
 
-<img src="images/ibi-saleae-capture.png" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" height="349"/>
+<figure>
+<a href="images/ibi-saleae-capture.jpg"><img src="images/ibi-saleae-capture.jpg" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /></a>
+</figure>
 
 Next, I connected the USB-UART adapter and started *screen* at the standard 115200 baud rate:
 

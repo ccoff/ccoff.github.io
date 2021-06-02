@@ -16,25 +16,35 @@ It got me thinking about building a head-based IR pointing device on the cheap. 
 
 First I needed something that could detect IR on the computer's side. I had a cheap webcam lying around:
 
-<img src="images/cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" height="240" />
+<figure>
+<a href="images/mouse-cheap-webcam.jpg"><img src="images/mouse-cheap-webcam.jpg" alt="Image: Cheap webcam" width="320" /></a>
+</figure>
 
 I did the tried-and-true test of pressing a button on a TV remote and looking at the resultant image captured by the webcam:
 
-<img src="images/webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" height="240" />
+<figure>
+<a href="images/mouse-webcam-ir-test.jpg"><img src="images/mouse-webcam-ir-test.jpg" alt="Image: Webcam 'seeing' infrared" width="320" /></a>
+</figure>
 
 No problem there: the camera could 'see' in infrared. In fact every webcam I tested (four in total) detected IR. 
 
 Next up was the IR transmitter. It needed to be head-mounted, and comfortable. A modifiable headlamp seemed the way to go. As a proof-of-concept first though, I put together a dead-simple, battery-powered IR LED 'transmitter' on a breadboard:
 
-<img src="images/breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" height="240" />
+<figure>
+<a href="images/mouse-breadboard-proof-of-concept.jpg"><img src="images/mouse-breadboard-proof-of-concept.jpg" alt="Image: Breadboard proof of concept" width="320" /></a>
+</figure>
 
 The webcam detected it easily, and basic software tracking using [OpenCV](https://www.opencv.org) looked promising (more on this below). Stray IR and light from windows, overhead lighting, and other sources was a problem though. I needed a pass filter for IR wavelengths that I could put over the webcam lens, and [this 808nm-1064nm wavelength IR pass filter](https://www.aliexpress.com/item/9mm-Filter-Lens-Filtering-against-400nm-750nm-Pass-808nm-1064nm-IR-InfraRed-Laser-Only/32278589551.html) seemed the perfect size at 9mm diameter:
 
-<img src="images/ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" height="240" />
+<figure>
+<a href="images/mouse-ir-pass-filter.jpg"><img src="images/mouse-ir-pass-filter.jpg" alt="Image: IR pass filter" width="320" /></a>
+</figure>
 
 And here is the filter covering the webcam lens:
 
-<img src="images/cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" height="240" />
+<figure>
+<a href="images/mouse-cheap-webcam-with-ir-filter.jpg"><img src="images/mouse-cheap-webcam-with-ir-filter.jpg" alt="Image: Webcam with IR filter in place" width="320" /></a>
+</figure>
 
 The filter dramatically reduced unwanted light from reaching the camera. I could now reliably detect and track the IR transmitter beam in various conditions: sunlight coming through open curtains, overhead lights on, etc.
 
@@ -42,13 +52,25 @@ It was time to spend some money on a 'real' IR transmitter. I needed a headlamp 
 
 Disassembling the lamp was easy: twist the lens cap, remove a holding bracket, and unscrew the circuit board containing the LEDs:
 
-<img src="images/headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" />
+<figure>
+<a href="images/mouse-headlamp-disassembly-1.jpg"><img src="images/mouse-headlamp-disassembly-1.jpg" alt="Image: Headlamp with lens cap removed" width="320" height="240" /></a>
+<figcaption>Headlamp with lens cap removed.</figcaption>
+</figure>
 
-<img src="images/headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" />
+<figure>
+<a href="images/mouse-headlamp-disassembly-2.jpg"><img src="images/mouse-headlamp-disassembly-2.jpg" alt="Image: Headlamp with circuit board removed" width="320" height="240" /></a>
+<figcaption>Headlamp with circuit board removed.</figcaption>
+</figure>
 
-<img src="images/headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" />
+<figure>
+<a href="images/mouse-headlamp-disassembly-3.jpg"><img src="images/mouse-headlamp-disassembly-3.jpg" alt="Image: Headlamp with back side of circuit board exposed" width="320" height="240" /></a>
+<figcaption>Headlamp with back side of circuit board exposed.</figcaption>
+</figure>
 
-<img src="images/headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" />
+<figure>
+<a href="images/mouse-headlamp-disassembly-4.jpg"><img src="images/mouse-headlamp-disassembly-4.jpg" alt="Image: Headlamp with side view of circuit board" width="320" height="240" /></a>
+<figcaption>Headlamp with side view of circuit board.</figcaption>
+</figure>
 
 The lamp has four lighting modes: three levels of white light brightness (2 LEDs, 10 LEDs, and 18 LEDs), and a red light flashing mode. I de-soldered the two LEDs in the center that provide the lowest white light level, and soldered two [890nm IR LEDs](https://uk.rs-online.com/web/p/ir-leds/6997663) in their place. (If you do this yourself, remember that LEDs are diodes, and the positive / negative terminals need to be soldered in the correct orientation. Look at the other LEDs on the board to determine which way they should go.)
 

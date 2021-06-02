@@ -6,7 +6,9 @@ Date: 2017-12-16
 
 I have an old Philips clock radio that includes a standalone temperature sensor module:
 
-<img src="images/philips_bottom.jpg" alt="Image: Philips outdoor temperature sensor" width="320" height="240" />
+<figure>
+<a href="images/temp-sdr-philips-bottom.jpg"><img src="images/temp-sdr-philips-bottom.jpg" alt="Image: Philips outdoor temperature sensor, bottom view" width="320" /></a>
+</figure>
 
 The idea is that you place this sensor outdoors, where it periodically sends temperature updates to the clock radio inside. I wanted to capture those transmissions and use the data programmatically, instead of just seeing it displayed on the clock radio. It occurred to me that a radio receiver ought to be able to pick up these transmissions.
 
@@ -28,7 +30,9 @@ The data packet was 36 bits long and repeated three times (with an extra startin
 
 First I had to determine the signal's timings. I loaded up a captured signal in Audacity:
 
-<img src="images/audacity-sample.png" alt="Image: Sample loaded in Audacity" width="640" height="270" />
+<figure>
+<a href="images/temp-sdr-audacity-sample.png"><img src="images/temp-sdr-audacity-sample.png" alt="Image: Sample loaded in Audacity" width="640" /></a>
+</figure>
 
 This showed a good, strong signal, with the long and short pulses clearly visible; the temperature sensor was using [pulse-width modulation (PWM)](https://en.wikipedia.org/wiki/Pulse-width_modulation). With Audacity's selection tools, I could precisely determine the timings for the pulse and gap widths.
 

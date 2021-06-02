@@ -10,11 +10,15 @@ Web searching indicated that [certain Dell monitors were prone to blown capacito
 
 I had nothing to lose and figured it was worth a shot. The first step was to disassemble the monitor, which was the hardest part by far of the entire process. Specifically, prying the bezel from the front of the monitor took some doing -- an old [London transit card](https://en.wikipedia.org/wiki/Oyster_card) I had laying around proved to be the best tool for this. In any event, after some careful disassembly at last I had unrestricted access to the power supply board:
 
-<img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" height="360" />
+<figure>
+<a href="images/monitor-power-supply-board.jpg"><img src="images/monitor-power-supply-board.jpg" alt="Image: Power supply board" width="480" /></a>
+</figure>
 
 Sure enough, there were three blown capacitors exhibiting the telltale bulging "dome" top and residue:
 
-<img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" height="360" />
+<figure>
+<a href="images/monitor-power-supply-board-closeup.jpg"><img src="images/monitor-power-supply-board-closeup.jpg" alt="Image: Power supply board closeup" width="480" /></a>
+</figure>
 
 I figured I might as well replace all of the power supply capacitors while I had the monitor disassembled. There were four different types of capacitors on the power supply board:
 
@@ -29,7 +33,10 @@ I was able to find them all with the exception of the 4.7 mF, 100 V which despit
 
 I removed the old capacitors and soldered the new ones on the power supply board. I then reassembled the monitor, and the moment of truth arrived. I plugged in the power cord and - boom! - it powered up without a hitch:
 
-<img src="images/monitor-working.jpg" alt="Image: Monitor working" width="480" height="360" />
+<figure>
+<a href="images/monitor-working.jpg"><img src="images/monitor-working.jpg" alt="Image: Monitor working" width="600" /></a>
+<figcaption>Success!</figcaption>
+</figure>
 
 So with less than $10 of parts I was able to reclaim a monitor otherwise destined to become e-waste.
 

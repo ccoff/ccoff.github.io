@@ -26,7 +26,7 @@ So pin 1 remained as the likely candidate for power (VCC). I powered up the devi
 Based on all of this information, at this point I was pretty confident that pin 1 = VCC, pin 2 = TX, pin 3 = RX, and 4 = GND. Before I hooked up my USB-UART adapter though, I used a logic analyzer to confirm my hypothesis. The analyzer's parser showed that there was indeed outgoing data that it could decode on pin 2:
 
 <figure>
-<a href="images/ibi-saleae-capture.jpg"><img src="images/ibi-saleae-capture.jpg" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /></a>
+<a href="images/ibi-saleae-capture.png"><img src="images/ibi-saleae-capture.png" alt="Image: Saleae Logic Analyzer serial parser capture" width="641" /></a>
 </figure>
 
 Next, I connected the USB-UART adapter and started *screen* at the standard 115200 baud rate:

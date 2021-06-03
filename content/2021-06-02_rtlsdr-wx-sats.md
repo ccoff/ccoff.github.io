@@ -1,4 +1,4 @@
-Title: Chasing weather satellites with SDR
+Title: Chasing weather satellites with software-defined radio
 Category: blog
 Tags: radio, sdr, satellites
 Slug: chasing-weather-satellites-with-sdr

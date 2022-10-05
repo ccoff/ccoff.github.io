@@ -75,9 +75,8 @@
 <p><strong>IMAP keywords</strong>, also known as <strong>custom flags</strong> or <strong>tags</strong>, are user-defined labels that you can assign to messages. Messages can have more than one keyword associated with them, allowing for multi-dimensional sorting. For example, you could define "Personal", "Family", and "Friends" keywords, and assign them interchangeably to messages and sort accordingly. Additionally, many e-mail clients use some sort of visual indicator (e.g., color) to differentiate messages by keyword, allowing you to rapidly scan an inbox and see what types of messages it contains.</p>
 <p>My primary e-mail client, <a href="https://www.thunderbird.net">Thunderbird</a>, uses these keywords extensively, both for arbitrary user-defined tags and for core functionality. For example, forwarded messages contain the <a href="https://tools.ietf.org/html/rfc5788#section-3.4.2">"$Forwarded"</a> keyword, which Thunderbird uses to display a special icon next to the message. I use several custom keywords to organize messages in my inboxes, and I absolutely had to have these preserved with the messages.</p>
 <p>So I looked at adding IMAP keyword preservation to Imapcopy. It had been awhile since I had worked with PHP, and I quickly discovered the built-in PHP IMAP e-mail functions were a bit lacking -- there was no function to directly fetch message keywords. However, you can obtain the raw IMAP message headers with the <a href="https://secure.php.net/manual/en/function.imap-headers.php"><strong>imap_headers()</strong></a> function. Here is a sample IMAP header as returned by <strong>imap_headers()</strong>: </p>
-<div class="highlight"><pre><span></span>  A    30)28-Jun-2018 Postmaster           {NonJunk $Forwarded} Registration renewal (3245 chars)
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>  A    30)28-Jun-2018 Postmaster           {NonJunk $Forwarded} Registration renewal (3245 chars)
+</code></pre></div>
 
 <p>The keywords always start at position 44 in the header, and are enclosed in braces {}. From that we can manually parse the header and obtain the keywords.</p>
 <p>From there, it was a simple matter of adding the parsed keywords to the migrated message's header. I tested everything thoroughly (the last thing we want is a corrupted mailbox!) and everything migrated over correctly. A merged <a href="https://github.com/wrzlbrmft/imapcopy/pull/7">pull request</a> later, and Imapcopy now does everything I want it to do, quickly and easily creating a perfect (as near as I can tell) duplicate of the source message and its attributes on the destination server with minimal fuss.</p></div>
@@ -103,6 +102,9 @@
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
+          <a href="https://ccoff.github.io/listening-to-shortwave-with-sdr">Not your father's radio: listening to shortwave with software-defined radio</a>
+      </li>
+      <li class="post">
           <a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr">Chasing weather satellites with software-defined radio</a>
       </li>
       <li class="post">
@@ -113,9 +115,6 @@
       </li>
       <li class="post">
           <a href="https://ccoff.github.io/repairing-lcd-monitor">Repairing an LCD monitor</a>
-      </li>
-      <li class="post">
-          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
       </li>
     </ul>
   </section>
@@ -132,7 +131,7 @@
 
   <section>
   <h1>Tags</h1>
-    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/shortwave">shortwave</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
 
 
     <section>
@@ -145,7 +144,7 @@
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy; 2021 Chris Coffey (ccoff) &mdash;
+    Copyright &copy; 2022 Chris Coffey (ccoff) &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>

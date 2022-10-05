@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>0xCC0FF - blog</title><link href="https://ccoff.github.io/" rel="alternate"></link><link href="https://ccoff.github.io/feeds/blog.atom.xml" rel="self"></link><id>https://ccoff.github.io/</id><updated>2021-06-02T00:00:00+01:00</updated><subtitle>A companion blog to my GitHub account</subtitle><entry><title>Chasing weather satellites with software-defined radio</title><link href="https://ccoff.github.io/chasing-weather-satellites-with-sdr" rel="alternate"></link><published>2021-06-02T00:00:00+01:00</published><updated>2021-06-02T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2021-06-02:/chasing-weather-satellites-with-sdr</id><summary type="html">&lt;p&gt;No matter where you are on Earth, several weather satellites pass overhead at least twice a day, broadcasting real-time imagery of what they see below. The most well-known of these satellites, at least in amateur radio circles, are the American NOAA and Russian Meteor satellites.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>0xCC0FF - blog</title><link href="https://ccoff.github.io/" rel="alternate"></link><link href="https://ccoff.github.io/feeds/blog.atom.xml" rel="self"></link><id>https://ccoff.github.io/</id><updated>2022-10-04T00:00:00+01:00</updated><subtitle>A companion blog to my GitHub account</subtitle><entry><title>Not your father's radio: listening to shortwave with software-defined radio</title><link href="https://ccoff.github.io/listening-to-shortwave-with-sdr" rel="alternate"></link><published>2022-10-04T00:00:00+01:00</published><updated>2022-10-04T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2022-10-04:/listening-to-shortwave-with-sdr</id><summary type="html">&lt;p&gt;Many years ago, I used my father's radio every now and then to listen to the shortwave bands. I would slowly turn the dials, hunting around for something to listen to. When I landed on something audible and semi-intelligible, I'd try to figure out what language I was hearing and …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Many years ago, I used my father's radio every now and then to listen to the shortwave bands. I would slowly turn the dials, hunting around for something to listen to. When I landed on something audible and semi-intelligible, I'd try to figure out what language I was hearing and where the transmission might be coming from.&lt;/p&gt;
+&lt;p&gt;The radio was a big, analog set -- specifically, an &lt;a href="https://www.radiomuseum.org/r/ross_world_master_re_8000.html"&gt;"RE-8000"&lt;/a&gt; made by &lt;a href="https://www.radiomuseum.org/dsp_hersteller_detail.cfm?company_id=3298"&gt;Ross Electronics Company&lt;/a&gt;:&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/shortwave-radio-front.jpg"&gt;&lt;img src="images/shortwave-radio-front.jpg" alt="Image: RE-8000 radio - front view" width="520" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;All those dials and pushbuttons... This radio still works, by the way.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+&lt;a href="images/shortwave-radio-backplate.jpg"&gt;&lt;img src="images/shortwave-radio-backplate.jpg" alt="Image: RE-8000 radio - backplate" width="520" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Backplate with frequency ranges.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;!--
+https://radioattic.com/item.htm?radio=0270328
+--&gt;
+
+&lt;p&gt;Looking back, there's a certain nostalgic appeal to twisting the dials and slowly working my way across the bands. But technology moves on, and there are more efficient (and I would argue, enjoyable) ways now to pull those faraway transmissions out of the air -- namely, SDR (software-defined radio).&lt;/p&gt;
+&lt;h2&gt;The receiver&lt;/h2&gt;
+&lt;p&gt;Software-defined radio opens up a world of possibilities. As I've mentioned in other posts, I have received &lt;a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr"&gt;satellite&lt;/a&gt; and &lt;a href="https://en.wikipedia.org/wiki/Automatic_Dependent_Surveillance%E2%80%93Broadcast"&gt;aircraft&lt;/a&gt; transmissions, worked with &lt;a href="https://ccoff.github.io/temperature-sensor-sdr-radio"&gt;temperature sensors&lt;/a&gt;, and more.&lt;/p&gt;
+&lt;p&gt;My main SDR workhorse is the &lt;a href="https://www.rtl-sdr.com"&gt;rtl-sdr&lt;/a&gt;. Costing only $25, it covers a wide frequency range, 24 MHz to 1.7 GHz. But for shortwave, we need to go lower than 24 MHz. Although the rtl-sdr can do this via direct sampling, it didn't work well in my experience, and in any event, I wanted an SDR designed "from the ground up" to cover the lower frequencies down in the HF range. Enter the &lt;a href="https://www.sdrplay.com/rsp1a"&gt;SDRPlay RSP1a&lt;/a&gt;: for about $110, this SDR goes from 1 kHz (!) all the way up to 2 GHz. It also has a much wider visible bandwidth than the rtl-sdr (you can see up to 10 MHz of spectrum simultaneously), built-in filters, a higher-resolution &lt;a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter"&gt;ADC&lt;/a&gt;, and more.&lt;/p&gt;
+&lt;p&gt;But a receiver by itself is pretty useless -- you also need a decent antenna.&lt;/p&gt;
+&lt;h2&gt;The antenna&lt;/h2&gt;
+&lt;p&gt;Unlike an antenna for ADS-B or NOAA satellites that is optimized to a specific frequency, for shortwave/HF we need to cover a wide frequency range -- about 500 kHz (AM radio) up to at least 18 MHz or more. Additionally, with frequencies much lower than VHF/UHF, we need a longer antenna. (The higher the frequency, the shorter the antenna. The lower the frequency, the longer the antenna.)&lt;/p&gt;
+&lt;p&gt;I had a 100-foot spool of 16 AWG speaker wire, so a &lt;a href="https://en.wikipedia.org/wiki/Random_wire_antenna"&gt;random wire antenna&lt;/a&gt; seemed like a good option to try. As its name implies, it's just a random length of wire that functions as an antenna. It doesn't really get more basic than that, but as with most antennas, the important thing is to try and get it as high as possible. Luckily I had access to the roof:&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/shortwave-antenna.jpg"&gt;&lt;img src="images/shortwave-antenna.jpg" alt="Image: Random wire antenna" width="520" height="520" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Random wire antenna on the roof (indicated by red arrows). Also visible between the arrows is my &lt;a href="http://www.radioforeveryone.com/p/coketenna-easy-cheap-effec.html"&gt;"Coketenna"&lt;/a&gt; for tracking airplanes.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;I ran the wire around most of the roof, down the outside wall and into my office, where I connected it to a &lt;a href="https://www.nooelec.com/store/balun-one-nine-v2.html"&gt;9:1 balun&lt;/a&gt;. The other balun connection went to ground -- specifically, a wire to the radiator pipe. A ground connection wasn't strictly necessary, but I found that it improved reception on most bands. During my testing, connecting and disconnecting the ground wire from the balun got tiresome, so I wired up a switch to quickly engage or disengage it:&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/shortwave-balun.jpg"&gt;&lt;img src="images/shortwave-balun.jpg" alt="Image: Balun connections" width="520" height="520" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;The antenna wire and ground wire (with cut-off switch) connect to the balun, which connects to the SDR, which connects to the computer.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h2&gt;What's the frequency, Kenneth?&lt;/h2&gt;
+&lt;p&gt;It was time to see what I could receive.&lt;/p&gt;
+&lt;p&gt;I usually use &lt;a href="https://gqrx.dk"&gt;Gqrx&lt;/a&gt; as my SDR application, but &lt;a href="https://cubicsdr.com"&gt;CubicSDR&lt;/a&gt; worked better with the SDRPlay. In any event, like most SDR applications, it shows a slice of the radio spectrum in a "waterfall" display, making it easy to pick out active signals:&lt;/p&gt;
+&lt;figure&gt;
+&lt;a href="images/shortwave-waterfall.gif"&gt;&lt;img src="images/shortwave-waterfall.gif" alt="Image: Waterfall display" width="520" height="520" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;Waterfall of the 31m (9.4-9.9 MHz) SW band.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Unlike with the old analog shortwave radio, there was no need to slowly turn the dial searching for active stations. Here I could see at a glance what was broadcasting, and on exactly which frequency.&lt;/p&gt;
+&lt;p&gt;Also in contrast to that bygone era, now there was a wealth of online resources with information that I could only have dreamed of having way back when. The SDR's frequency precision, combined with the information on &lt;a href="https://www.short-wave.info/index.php"&gt;this site&lt;/a&gt;, made it trivial to figure out at any given moment what station I was listening to, its transmitter strength in kilowatts, and where it was located. No more guesswork!&lt;/p&gt;
+&lt;p&gt;Here are some of the stations I received from my location in North Africa:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;BBC from Ascension Island (~3,500 miles away)&lt;/li&gt;
+&lt;li&gt;China Radio International from Jinhua, China (~6,000 miles away)&lt;/li&gt;
+&lt;li&gt;VOA from Kuwait (~2,200 miles away)&lt;/li&gt;
+&lt;li&gt;Voice of Korea from Kujang, North Korea (~5,700 miles away)&lt;/li&gt;
+&lt;li&gt;TWR Africa from Manzini, Swaziland (~4,600 miles away)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Not bad for a random length of wire on the roof!&lt;/p&gt;</content><category term="radio"></category><category term="sdr"></category><category term="shortwave"></category></entry><entry><title>Chasing weather satellites with software-defined radio</title><link href="https://ccoff.github.io/chasing-weather-satellites-with-sdr" rel="alternate"></link><published>2021-06-02T00:00:00+01:00</published><updated>2021-06-02T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2021-06-02:/chasing-weather-satellites-with-sdr</id><summary type="html">&lt;p&gt;No matter where you are on Earth, several weather satellites pass overhead at least twice a day, broadcasting real-time imagery of what they see below. The most well-known of these satellites, at least in amateur radio circles, are the American NOAA and Russian Meteor satellites.&lt;/p&gt;
 &lt;p&gt;The NOAA satellites (there are …&lt;/p&gt;</summary><content type="html">&lt;p&gt;No matter where you are on Earth, several weather satellites pass overhead at least twice a day, broadcasting real-time imagery of what they see below. The most well-known of these satellites, at least in amateur radio circles, are the American NOAA and Russian Meteor satellites.&lt;/p&gt;
 &lt;p&gt;The NOAA satellites (there are currently three of them, NOAA-15, -18, and -19) broadcast at around 137 MHz in the analog &lt;a href="https://en.wikipedia.org/wiki/Automatic_picture_transmission"&gt;Automatic Picture Transmission (APT)&lt;/a&gt; format. (They also broadcast digital formats at a much higher frequency, but that requires a high-gain antenna with a way to track the satellite as it passes over, significantly complicating the task.) The Russian Meteor-M 2 satellite also broadcasts around 137 MHz, but in the digital &lt;a href="https://en.wikipedia.org/wiki/Low-rate_picture_transmission"&gt;low-rate picture transmission (LRPT)&lt;/a&gt; format. By way of comparison, digital LRPT has a resolution of 1 km/pixel, while analog APT is 4km/pixel.&lt;/p&gt;
 &lt;p&gt;In the not-too-distant past, you needed dedicated, expensive hardware to receive these transmissions. But with software-defined radio (SDR), the entry barriers to obtaining real-time weather satellite imagery are much lower. You can get a basic SDR dongle for $10, and construct a simple antenna for even less.&lt;/p&gt;
@@ -45,7 +98,6 @@ Still with me? Let's return to the main tale...
 &lt;br/&gt;
 &lt;br/&gt;
 &lt;/details&gt;
-
 &lt;p&gt;&lt;br/&gt;
 I used a bunch of telescopic antennas (eight total) for the dipoles and reflectors. Terminal blocks came in handy again for connecting everything up. With a wooden broom handle to support everything, I had my first prototype turnstile antenna. I went up on the roof and set everything up:&lt;/p&gt;
 &lt;figure&gt;
@@ -97,32 +149,28 @@ I used a bunch of telescopic antennas (eight total) for the dipoles and reflecto
 &lt;p&gt;So many satellites, so little time...&lt;/p&gt;</content><category term="radio"></category><category term="sdr"></category><category term="satellites"></category></entry><entry><title>Customizing a live ISO image</title><link href="https://ccoff.github.io/customizing-live-iso-image" rel="alternate"></link><published>2020-04-26T00:00:00+01:00</published><updated>2020-04-26T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-04-26:/customizing-live-iso-image</id><summary type="html">&lt;p&gt;I have an &lt;a href="https://www.digital-loggers.com/api_faqs.html"&gt;Atomic Pi&lt;/a&gt; that I use as a NAS. Every now and then, I back up the on-board eMMC with &lt;em&gt;dd&lt;/em&gt;. To do this, I boot from a &lt;a href="https://www.debian.org/CD/live"&gt;live Debian image&lt;/a&gt; on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have an &lt;a href="https://www.digital-loggers.com/api_faqs.html"&gt;Atomic Pi&lt;/a&gt; that I use as a NAS. Every now and then, I back up the on-board eMMC with &lt;em&gt;dd&lt;/em&gt;. To do this, I boot from a &lt;a href="https://www.debian.org/CD/live"&gt;live Debian image&lt;/a&gt; on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though -- the live image waits for a keypress at the boot menu, and it doesn't start an SSH server. So there is no way to access it remotely.&lt;/p&gt;
 &lt;p&gt;I wanted to be able to plug in the live USB stick, boot the server, connect via SSH, and &lt;em&gt;dd&lt;/em&gt; the eMMC without having to connect other hardware. As it turns out, modifying the filesystem of a live ISO image is not difficult. The following procedure shows how to take a Debian live ISO file, unpack it, modify the filesystem, and pack it back up into a new, customized ISO file.&lt;/p&gt;
 &lt;p&gt;First, we create some working directories where we can extract and modify the ISO image:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mkdir -p custom-iso/mnt
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir -p custom-iso/mnt
 mkdir -p custom-iso/iso
 mkdir -p custom-iso/squashfs
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Next, we mount the Debian ISO image file to get to the files inside. (Below, it's mounted at &lt;em&gt;/media/d-live 10.4.0 st amd64&lt;/em&gt;.) We use &lt;em&gt;rsync&lt;/em&gt; to copy the files from there into the &lt;em&gt;custom-iso/iso&lt;/em&gt; directory. After that, we mount the ISO file's squashfs filesystem in the &lt;em&gt;custom-iso/mnt&lt;/em&gt; directory, and finally copy the unpacked contents of the squashed filesystem into the &lt;em&gt;custom-iso/squashfs&lt;/em&gt; directory:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cd custom-iso
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cd custom-iso
 sudo rsync -a /media/d-live\ 10.4.0\ st\ amd64/ iso/
 sudo mount -o loop iso/live/filesystem.squashfs mnt
 sudo rsync -a mnt/ squashfs/
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We have the squash filesystem extracted, and we're ready to modify it. Before we enter a chroot to do that though, let's copy the current &lt;em&gt;resolv.conf&lt;/em&gt; to make sure networking works correctly:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo cp /etc/resolv.conf squashfs/etc
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo cp /etc/resolv.conf squashfs/etc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now we can enter the chroot:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo chroot ./squashfs
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo chroot ./squashfs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We can make any changes we like in here. The following commands install an SSH server, configure it, and clean up. Remember, this is all done &lt;em&gt;inside&lt;/em&gt; the chroot:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mount -t proc none /proc/
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mount -t proc none /proc/
 mount -t sysfs none /sys/
 
 apt update
@@ -143,40 +191,34 @@ umount /proc/
 umount /sys/
  rm ~/.bash_history
  exit
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;(Note the leading space before the last two commands -- this ensures Bash doesn't save the commands in its history.)&lt;/p&gt;
 &lt;p&gt;At this point, we've modified the filesystem to what we want, but we still need to make a few more tweaks to the live configuration. The default Debian live ISO waits for the user to select an option during startup -- obviously that's a problem in a headless environment. We want the image to boot automatically with no intervention so we can get the all-important SSH server running. So we edit the &lt;em&gt;iso/boot/grub/grub.cfg&lt;/em&gt; file, and set a timeout (2 seconds here) for the boot menu:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;set timeout=2
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;set timeout=2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;We want to cover EFI and isolinux boot environments, so we edit the &lt;em&gt;iso/isolinux/isolinux.cfg&lt;/em&gt; file as well (here the time is specified in deciseconds):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;timeout 20
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;timeout 20
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;That's it for the modifications. Now we're ready to build a new ISO file with our changes in it. First we need to install a few packages:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt install xorriso
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo apt install xorriso
 sudo apt install isolinux
 sudo apt install squashfs-tools
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Next we "re-squash" the filesystem and copy it back into the &lt;em&gt;iso/live&lt;/em&gt; directory:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo mksquashfs squashfs filesystem.squashfs
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo mksquashfs squashfs filesystem.squashfs
 cp filesystem.squashfs iso/live
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;And finally, we build the new ISO file with the following lovely one-liner... We can change the &lt;strong&gt;-outdev&lt;/strong&gt; and &lt;strong&gt;-volid&lt;/strong&gt; options to whatever names we want for the filename and volume name:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
 -compliance no_emul_toc -map ./iso / -chmod 0755 / -- -boot_image isolinux dir=/isolinux \
 -boot_image isolinux system_area=/usr/lib/ISOLINUX/isohdpfx.bin -boot_image any next \
 -boot_image any efi_path=boot/grub/efi.img -boot_image isolinux partition_entry=gpt_basdat
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. And making disk image backups on a headless device is much easier now.&lt;/p&gt;</content><category term="linux"></category><category term="iso"></category><category term="live image"></category></entry><entry><title>The art of finding a UART</title><link href="https://ccoff.github.io/art-of-finding-uart" rel="alternate"></link><published>2020-01-21T00:00:00+00:00</published><updated>2020-01-21T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2020-01-21:/art-of-finding-uart</id><summary type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I had access to an &lt;a href="https://www.meetibi.com"&gt;Ibi&lt;/a&gt; to play around with. The Ibi is a networked media storage device from Sandisk, which is now part of Western Digital. Sandisk bills the Ibi as a "personal cloud for your photos and videos." However, you can only use it with their Ibi smartphone app, and that app requires a ridiculous amount of permissions -- you might as well install a backdoor on your phone. I wanted to see what made the Ibi tick, and if it could be customized.&lt;/p&gt;
 &lt;p&gt;On the outside, the Ibi has a USB 3.0 port, power jack, and LED. There is no ethernet port, only WiFi, and no video output. Beyond that it's a black box (figuratively speaking, as it has a white case). What I needed was a serial &lt;a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter"&gt;UART&lt;/a&gt; (universal asynchronous receiver-transmitter) connection to see device startup messages and information about its configuration. Many routers, switches, and other embedded devices have some sort of UART capability for troubleshooting and diagnostic purposes, and I hoped the Ibi would be the same.&lt;/p&gt;
@@ -198,12 +240,11 @@ cp filesystem.squashfs iso/live
 &lt;/figure&gt;
 
 &lt;p&gt;Next, I connected the USB-UART adapter and started &lt;em&gt;screen&lt;/em&gt; at the standard 115200 baud rate:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;screen /dev/ttyUSB0 115200
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;screen /dev/ttyUSB0 115200
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;I powered up the board, and was greeted with a stream of text as U-Boot and the kernel did their thing:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[sid]delta long!!11250
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[sid]delta long!!11250
 
 [sid]delta long!!11250
 
@@ -246,13 +287,11 @@ Factory: pp:0, seq#:0x10, size:0x2800
 [    0.000000] Initializing cgroup subsys cpuacct
 [    0.000000] Linux version 4.1.17 (build@build-yocto2) (gcc version 4.9.4 20150629 (prerelease) (Realtek ASDK64-4.9.4p1 Build 2285) ) #1 SMP PREEMPT Wed Jul 24 17:13:01 PDT 2019 (commit id:a61c128eddbd2d423fca8adfe4ee1c2aaa8ee6df)
 [    0.000000] CPU: AArch64 Processor [410fd034] revision 4
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;After startup completed, I arrived at a shell prompt as the root user:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@yodaplus32_mini:/ #
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@yodaplus32_mini:/ #
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;So the UART gave me what I needed -- visibility into the startup process, and a shell for looking around the filesystem. It turns out the Ibi uses a two-stage U-Boot loading process and runs Android. There is no SSH server (or even a text editor) installed, so it's a pretty bare-bones OS installation.&lt;/p&gt;
 &lt;p&gt;The bootup process indicates the CPU is a quad-core A53 ARM processor; looking at the board under the heatsink reveals a &lt;a href="https://www.realtek.com/en/products/communications-network-ics/item/rtd1295"&gt;Realtek RTD1295 SoC&lt;/a&gt;. Unfortunately, Linux kernel support for the Realtek RTD1295 is patchy, though work appears to be picking up in that area. Hopefully in the near future, it will be possible to boot a vanilla kernel on the Ibi and get a full Linux distro running on it, as opposed to a locked-down Android install.&lt;/p&gt;</content><category term="hardware"></category><category term="reverse engineer"></category><category term="UART"></category></entry><entry><title>Repairing an LCD monitor</title><link href="https://ccoff.github.io/repairing-lcd-monitor" rel="alternate"></link><published>2019-12-14T00:00:00+00:00</published><updated>2019-12-14T00:00:00+00:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2019-12-14:/repairing-lcd-monitor</id><summary type="html">&lt;p&gt;I have an old &lt;a href="https://www.dell.com/support/home/us/en/19/product-support/product/dell-e2014h/docs"&gt;Dell E2014H 20" monitor&lt;/a&gt; that recently started having issues: when I turned it on, the power LED blinked on and off over and over, and the screen remained blank. So the monitor was getting power, but something was amiss somewhere.&lt;/p&gt;
@@ -288,9 +327,8 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;&lt;strong&gt;IMAP keywords&lt;/strong&gt;, also known as &lt;strong&gt;custom flags&lt;/strong&gt; or &lt;strong&gt;tags&lt;/strong&gt;, are user-defined labels that you can assign to messages. Messages can have more than one keyword associated with them, allowing for multi-dimensional sorting. For example, you could define "Personal", "Family", and "Friends" keywords, and assign them interchangeably to messages and sort accordingly. Additionally, many e-mail clients use some sort of visual indicator (e.g., color) to differentiate messages by keyword, allowing you to rapidly scan an inbox and see what types of messages it contains.&lt;/p&gt;
 &lt;p&gt;My primary e-mail client, &lt;a href="https://www.thunderbird.net"&gt;Thunderbird&lt;/a&gt;, uses these keywords extensively, both for arbitrary user-defined tags and for core functionality. For example, forwarded messages contain the &lt;a href="https://tools.ietf.org/html/rfc5788#section-3.4.2"&gt;"$Forwarded"&lt;/a&gt; keyword, which Thunderbird uses to display a special icon next to the message. I use several custom keywords to organize messages in my inboxes, and I absolutely had to have these preserved with the messages.&lt;/p&gt;
 &lt;p&gt;So I looked at adding IMAP keyword preservation to Imapcopy. It had been awhile since I had worked with PHP, and I quickly discovered the built-in PHP IMAP e-mail functions were a bit lacking -- there was no function to directly fetch message keywords. However, you can obtain the raw IMAP message headers with the &lt;a href="https://secure.php.net/manual/en/function.imap-headers.php"&gt;&lt;strong&gt;imap_headers()&lt;/strong&gt;&lt;/a&gt; function. Here is a sample IMAP header as returned by &lt;strong&gt;imap_headers()&lt;/strong&gt;: &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  A    30)28-Jun-2018 Postmaster           {NonJunk $Forwarded} Registration renewal (3245 chars)
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;  A    30)28-Jun-2018 Postmaster           {NonJunk $Forwarded} Registration renewal (3245 chars)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The keywords always start at position 44 in the header, and are enclosed in braces {}. From that we can manually parse the header and obtain the keywords.&lt;/p&gt;
 &lt;p&gt;From there, it was a simple matter of adding the parsed keywords to the migrated message's header. I tested everything thoroughly (the last thing we want is a corrupted mailbox!) and everything migrated over correctly. A merged &lt;a href="https://github.com/wrzlbrmft/imapcopy/pull/7"&gt;pull request&lt;/a&gt; later, and Imapcopy now does everything I want it to do, quickly and easily creating a perfect (as near as I can tell) duplicate of the source message and its attributes on the destination server with minimal fuss.&lt;/p&gt;</content><category term="imap"></category><category term="e-mail"></category><category term="php"></category></entry><entry><title>A modest mouse: Building a low-cost, head-mounted infrared pointing device</title><link href="https://ccoff.github.io/a-modest-mouse" rel="alternate"></link><published>2018-05-30T00:00:00+01:00</published><updated>2018-05-30T00:00:00+01:00</updated><author><name>Chris Coffey (ccoff)</name></author><id>tag:ccoff.github.io,2018-05-30:/a-modest-mouse</id><summary type="html">&lt;p&gt;I stopped using a mouse a few years ago and replaced it with a small USB touchpad. Still, I've always had an eye on getting rid of hand-based pointing devices completely. A few months back, I saw &lt;a href="https://arstechnica.com/gaming/2018/02/coding-without-a-keystroke-the-hands-free-creation-of-a-full-video-game"&gt;an article on Ars Technica&lt;/a&gt; about a coder who programmed a game entirely …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I stopped using a mouse a few years ago and replaced it with a small USB touchpad. Still, I've always had an eye on getting rid of hand-based pointing devices completely. A few months back, I saw &lt;a href="https://arstechnica.com/gaming/2018/02/coding-without-a-keystroke-the-hands-free-creation-of-a-full-video-game"&gt;an article on Ars Technica&lt;/a&gt; about a coder who programmed a game entirely without using his hands. He primarily used speech recognition, but for a mouse replacement, he used a &lt;a href="https://www.naturalpoint.com/smartnav/products/4-at"&gt;SmartNav 4&lt;/a&gt;.&lt;/p&gt;
@@ -382,11 +420,10 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;p&gt;I have several software-defined radio (SDR) USB dongles (such as &lt;a href="https://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"&gt;this&lt;/a&gt; and &lt;a href="https://www.aliexpress.com/item/Mini-Portable-Digital-USB-2-0-TV-Stick-DVB-T-DAB-FM-RTL2832U-R820T2-Support-SDR/32914826153.html"&gt;this&lt;/a&gt;). It's pretty amazing what you can do with these low-cost devices, which generally have a range of around 25 MHz to 1.75 GHz. Beyond the obvious radio and TV broadcasts, I've picked up aircraft (&lt;a href="https://en.wikipedia.org/wiki/ACARS"&gt;ACARS&lt;/a&gt;) transmissions, weather data, pager and GSM traffic, and more. So I thought SDR might be a good way to see what this temperature sensor was sending to the clock radio.&lt;/p&gt;
 &lt;p&gt;I had no idea what frequency the temperature sensor used, but the &lt;a href="https://en.wikipedia.org/wiki/ISM_band"&gt;ISM band&lt;/a&gt; seemed like a good place to start investigating, as many consumer-grade devices transmit around 433 MHz. The excellent and popular &lt;a href="https://github.com/merbanan/rtl_433"&gt;rtl_433 project&lt;/a&gt; supports a large number of 433 MHz devices, enabling you to decode protocols and output data in a number of formats (JSON, CSV, etc.).&lt;/p&gt;
 &lt;p&gt;I plugged in an SDR dongle, started up rtl_433 and waited for the temperature sensor to send one of its updates. Sure enough, rtl_433 picked it up straight away and dumped the raw data:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[00] {40} 00 14 b9 c0 18 : 00000000 00010100 10111001 11000000 00011000 
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[00] {40} 00 14 b9 c0 18 : 00000000 00010100 10111001 11000000 00011000 
 [01] {36} 01 4b 9c 01 80 : 00000001 01001011 10011100 00000001 1000
 [02] {36} 01 4b 9c 01 80 : 00000001 01001011 10011100 00000001 1000
-&lt;/pre&gt;&lt;/div&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The data packet was 36 bits long and repeated three times (with an extra starting nibble -- probably a sync signal of some sort -- on the first data row). rtl_433 couldn't decode anything from the data, which wasn't too surprising -- there are many, many types of sensors out there, each with their own proprietary format. If I wanted to make use of my sensor, I would have to reverse-engineer the protocol and write a decoder myself.&lt;/p&gt;
 &lt;h2&gt;Reverse-engineering the protocol&lt;/h2&gt;
@@ -407,7 +444,7 @@ Factory: pp:0, seq#:0x10, size:0x2800
 &lt;h2&gt;Putting it all together&lt;/h2&gt;
 &lt;p&gt;Having decoded the temperature sensor's protocol, it was easy enough to write up a decoder for it in rtl_433. A &lt;a href="https://github.com/merbanan/rtl_433/pull/619"&gt;Github PR&lt;/a&gt; later, and rtl_433 now includes support for my Philips temperature sensor (see the code &lt;a href="https://github.com/merbanan/rtl_433/blob/master/src/devices/philips_aj3650.c"&gt;here&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;Now I can pick off data from the temperature sensor and output it in a variety of formats for further processing. Here's some sample output, with sensor data in JSON on the last line:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;walrus@box:~$ rtl_433 -F json
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;walrus@box:~$ rtl_433 -F json
 rtl_433 version 18.12-89-gdd842fc8af branch master at 201902131202 inputs file rtl_tcp RTL-SDR
 Registered 96 out of 120 device decoding protocols [ 1-4 8 11-12 15-17 19-21 23 25-26 29-36 38-60 62-64 67-71 73-100 102-103 108-116 119 ]
 Detached kernel driver
@@ -418,4 +455,4 @@ Sample rate set to 250000 S/s.
 Tuner gain set to Auto.
 Tuned to 433.920MHz.
 {&amp;quot;time&amp;quot; : &amp;quot;2017-12-16 14:25:38&amp;quot;, &amp;quot;model&amp;quot; : &amp;quot;Philips outdoor temperature sensor&amp;quot;, &amp;quot;channel&amp;quot; : 3, &amp;quot;temperature_C&amp;quot; : 22.800, &amp;quot;battery&amp;quot; : &amp;quot;OK&amp;quot;}
-&lt;/pre&gt;&lt;/div&gt;</content><category term="radio"></category><category term="sdr"></category><category term="sensors"></category></entry></feed>
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="radio"></category><category term="sdr"></category><category term="sensors"></category></entry></feed>

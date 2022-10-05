@@ -73,32 +73,28 @@
   <div class="entry-content"><p>I have an <a href="https://www.digital-loggers.com/api_faqs.html">Atomic Pi</a> that I use as a NAS. Every now and then, I back up the on-board eMMC with <em>dd</em>. To do this, I boot from a <a href="https://www.debian.org/CD/live">live Debian image</a> on a USB stick. This requires attaching a keyboard and monitor to the normally headless server, though -- the live image waits for a keypress at the boot menu, and it doesn't start an SSH server. So there is no way to access it remotely.</p>
 <p>I wanted to be able to plug in the live USB stick, boot the server, connect via SSH, and <em>dd</em> the eMMC without having to connect other hardware. As it turns out, modifying the filesystem of a live ISO image is not difficult. The following procedure shows how to take a Debian live ISO file, unpack it, modify the filesystem, and pack it back up into a new, customized ISO file.</p>
 <p>First, we create some working directories where we can extract and modify the ISO image:</p>
-<div class="highlight"><pre><span></span>mkdir -p custom-iso/mnt
+<div class="highlight"><pre><span></span><code>mkdir -p custom-iso/mnt
 mkdir -p custom-iso/iso
 mkdir -p custom-iso/squashfs
-</pre></div>
-
+</code></pre></div>
 
 <p>Next, we mount the Debian ISO image file to get to the files inside. (Below, it's mounted at <em>/media/d-live 10.4.0 st amd64</em>.) We use <em>rsync</em> to copy the files from there into the <em>custom-iso/iso</em> directory. After that, we mount the ISO file's squashfs filesystem in the <em>custom-iso/mnt</em> directory, and finally copy the unpacked contents of the squashed filesystem into the <em>custom-iso/squashfs</em> directory:</p>
-<div class="highlight"><pre><span></span>cd custom-iso
+<div class="highlight"><pre><span></span><code>cd custom-iso
 sudo rsync -a /media/d-live\ 10.4.0\ st\ amd64/ iso/
 sudo mount -o loop iso/live/filesystem.squashfs mnt
 sudo rsync -a mnt/ squashfs/
-</pre></div>
-
+</code></pre></div>
 
 <p>We have the squash filesystem extracted, and we're ready to modify it. Before we enter a chroot to do that though, let's copy the current <em>resolv.conf</em> to make sure networking works correctly:</p>
-<div class="highlight"><pre><span></span>sudo cp /etc/resolv.conf squashfs/etc
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>sudo cp /etc/resolv.conf squashfs/etc
+</code></pre></div>
 
 <p>Now we can enter the chroot:</p>
-<div class="highlight"><pre><span></span>sudo chroot ./squashfs
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>sudo chroot ./squashfs
+</code></pre></div>
 
 <p>We can make any changes we like in here. The following commands install an SSH server, configure it, and clean up. Remember, this is all done <em>inside</em> the chroot:</p>
-<div class="highlight"><pre><span></span>mount -t proc none /proc/
+<div class="highlight"><pre><span></span><code>mount -t proc none /proc/
 mount -t sysfs none /sys/
 
 apt update
@@ -119,40 +115,34 @@ umount /proc/
 umount /sys/
  rm ~/.bash_history
  exit
-</pre></div>
-
+</code></pre></div>
 
 <p>(Note the leading space before the last two commands -- this ensures Bash doesn't save the commands in its history.)</p>
 <p>At this point, we've modified the filesystem to what we want, but we still need to make a few more tweaks to the live configuration. The default Debian live ISO waits for the user to select an option during startup -- obviously that's a problem in a headless environment. We want the image to boot automatically with no intervention so we can get the all-important SSH server running. So we edit the <em>iso/boot/grub/grub.cfg</em> file, and set a timeout (2 seconds here) for the boot menu:</p>
-<div class="highlight"><pre><span></span>set timeout=2
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>set timeout=2
+</code></pre></div>
 
 <p>We want to cover EFI and isolinux boot environments, so we edit the <em>iso/isolinux/isolinux.cfg</em> file as well (here the time is specified in deciseconds):</p>
-<div class="highlight"><pre><span></span>timeout 20
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>timeout 20
+</code></pre></div>
 
 <p>That's it for the modifications. Now we're ready to build a new ISO file with our changes in it. First we need to install a few packages:</p>
-<div class="highlight"><pre><span></span>sudo apt install xorriso
+<div class="highlight"><pre><span></span><code>sudo apt install xorriso
 sudo apt install isolinux
 sudo apt install squashfs-tools
-</pre></div>
-
+</code></pre></div>
 
 <p>Next we "re-squash" the filesystem and copy it back into the <em>iso/live</em> directory:</p>
-<div class="highlight"><pre><span></span>sudo mksquashfs squashfs filesystem.squashfs
+<div class="highlight"><pre><span></span><code>sudo mksquashfs squashfs filesystem.squashfs
 cp filesystem.squashfs iso/live
-</pre></div>
-
+</code></pre></div>
 
 <p>And finally, we build the new ISO file with the following lovely one-liner... We can change the <strong>-outdev</strong> and <strong>-volid</strong> options to whatever names we want for the filename and volume name:</p>
-<div class="highlight"><pre><span></span>xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
+<div class="highlight"><pre><span></span><code>xorriso -outdev debian-live-10.4.0-amd64-custom.iso -volid d-live\ 10.4\ cust\ amd64 -padding 0 \
 -compliance no_emul_toc -map ./iso / -chmod 0755 / -- -boot_image isolinux dir=/isolinux \
 -boot_image isolinux system_area=/usr/lib/ISOLINUX/isohdpfx.bin -boot_image any next \
 -boot_image any efi_path=boot/grub/efi.img -boot_image isolinux partition_entry=gpt_basdat
-</pre></div>
-
+</code></pre></div>
 
 <p>When that command finishes, we have a customized ISO file suitable for a USB drive, CD, or other boot media. And making disk image backups on a headless device is much easier now.</p></div>
     <footer>
@@ -177,6 +167,9 @@ cp filesystem.squashfs iso/live
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
+          <a href="https://ccoff.github.io/listening-to-shortwave-with-sdr">Not your father's radio: listening to shortwave with software-defined radio</a>
+      </li>
+      <li class="post">
           <a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr">Chasing weather satellites with software-defined radio</a>
       </li>
       <li class="post">
@@ -187,9 +180,6 @@ cp filesystem.squashfs iso/live
       </li>
       <li class="post">
           <a href="https://ccoff.github.io/repairing-lcd-monitor">Repairing an LCD monitor</a>
-      </li>
-      <li class="post">
-          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
       </li>
     </ul>
   </section>
@@ -206,7 +196,7 @@ cp filesystem.squashfs iso/live
 
   <section>
   <h1>Tags</h1>
-    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/shortwave">shortwave</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
 
 
     <section>
@@ -219,7 +209,7 @@ cp filesystem.squashfs iso/live
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy; 2021 Chris Coffey (ccoff) &mdash;
+    Copyright &copy; 2022 Chris Coffey (ccoff) &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>

@@ -90,12 +90,11 @@
 </figure>
 
 <p>Next, I connected the USB-UART adapter and started <em>screen</em> at the standard 115200 baud rate:</p>
-<div class="highlight"><pre><span></span>screen /dev/ttyUSB0 115200
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>screen /dev/ttyUSB0 115200
+</code></pre></div>
 
 <p>I powered up the board, and was greeted with a stream of text as U-Boot and the kernel did their thing:</p>
-<div class="highlight"><pre><span></span>[sid]delta long!!11250
+<div class="highlight"><pre><span></span><code>[sid]delta long!!11250
 
 [sid]delta long!!11250
 
@@ -138,13 +137,11 @@ Factory: pp:0, seq#:0x10, size:0x2800
 [    0.000000] Initializing cgroup subsys cpuacct
 [    0.000000] Linux version 4.1.17 (build@build-yocto2) (gcc version 4.9.4 20150629 (prerelease) (Realtek ASDK64-4.9.4p1 Build 2285) ) #1 SMP PREEMPT Wed Jul 24 17:13:01 PDT 2019 (commit id:a61c128eddbd2d423fca8adfe4ee1c2aaa8ee6df)
 [    0.000000] CPU: AArch64 Processor [410fd034] revision 4
-</pre></div>
-
+</code></pre></div>
 
 <p>After startup completed, I arrived at a shell prompt as the root user:</p>
-<div class="highlight"><pre><span></span>root@yodaplus32_mini:/ #
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>root@yodaplus32_mini:/ #
+</code></pre></div>
 
 <p>So the UART gave me what I needed -- visibility into the startup process, and a shell for looking around the filesystem. It turns out the Ibi uses a two-stage U-Boot loading process and runs Android. There is no SSH server (or even a text editor) installed, so it's a pretty bare-bones OS installation.</p>
 <p>The bootup process indicates the CPU is a quad-core A53 ARM processor; looking at the board under the heatsink reveals a <a href="https://www.realtek.com/en/products/communications-network-ics/item/rtd1295">Realtek RTD1295 SoC</a>. Unfortunately, Linux kernel support for the Realtek RTD1295 is patchy, though work appears to be picking up in that area. Hopefully in the near future, it will be possible to boot a vanilla kernel on the Ibi and get a full Linux distro running on it, as opposed to a locked-down Android install.</p></div>
@@ -170,6 +167,9 @@ Factory: pp:0, seq#:0x10, size:0x2800
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
+          <a href="https://ccoff.github.io/listening-to-shortwave-with-sdr">Not your father's radio: listening to shortwave with software-defined radio</a>
+      </li>
+      <li class="post">
           <a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr">Chasing weather satellites with software-defined radio</a>
       </li>
       <li class="post">
@@ -180,9 +180,6 @@ Factory: pp:0, seq#:0x10, size:0x2800
       </li>
       <li class="post">
           <a href="https://ccoff.github.io/repairing-lcd-monitor">Repairing an LCD monitor</a>
-      </li>
-      <li class="post">
-          <a href="https://ccoff.github.io/preserving-imap-keywords">Preserving IMAP keywords during e-mail migrations</a>
       </li>
     </ul>
   </section>
@@ -199,7 +196,7 @@ Factory: pp:0, seq#:0x10, size:0x2800
 
   <section>
   <h1>Tags</h1>
-    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/shortwave">shortwave</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
 
 
     <section>
@@ -212,7 +209,7 @@ Factory: pp:0, seq#:0x10, size:0x2800
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy; 2021 Chris Coffey (ccoff) &mdash;
+    Copyright &copy; 2022 Chris Coffey (ccoff) &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>

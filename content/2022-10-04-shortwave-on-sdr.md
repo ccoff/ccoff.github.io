@@ -66,6 +66,7 @@ Here are some of the stations I received from my location in North Africa:
 
 * BBC from Ascension Island (~3,500 miles away)
 * China Radio International from Jinhua, China (~6,000 miles away)
+* Radio Free Asia from Agingan Point, Northern Mariana Islands (~7,800 miles away)
 * VOA from Kuwait (~2,200 miles away)
 * Voice of Korea from Kujang, North Korea (~5,700 miles away)
 * TWR Africa from Manzini, Swaziland (~4,600 miles away)

@@ -1,7 +1,7 @@
-Title: Code caving: binary patches for fun and no profit
+Title: Binary patching for fun and zero profit
 Category: blog
 Tags: sdr, satellites, linux, reverse engineer
-Slug: code-caving-binary-patches
+Slug: binary-patching
 Date: 2023-03-07
 
 I use software-defined radio (SDR) to download [real-time data from weather satellites](https://ccoff.github.io/chasing-weather-satellites-with-sdr). To generate the imagery from the data I use the excellent, but no longer maintained, [wxtoimg](https://wxtoimgrestored.xyz) program on Linux. It generates nice map overlays for the imagery, but to do this correctly, wxtoimg needs up-to-date information on satellite positions. It gets this by downloading the current [orbital data](https://en.wikipedia.org/wiki/Two-line_element_set) from the internet. Unfortunately wxtoimg uses a hard-coded string for the target hostname, so when the domain changed a few months ago from celestrak.*com* to celestrak.*org*, wxtoimg couldn't get its satellite positions, and the map overlays were completely wrong.

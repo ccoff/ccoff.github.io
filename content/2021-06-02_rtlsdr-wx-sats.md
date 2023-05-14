@@ -42,7 +42,7 @@ The V-dipole was a good first antenna for experimenting, but I would have to bui
 
 ## Enter the turnstile
 
-There were several possibilities for satellite antennas, but the [quadrifilar helix (QFH)](http://dodgem37.com/wp-content/uploads/2019/04/How-To-Build-A-QFH.pdf) and [turnstile](https://en.wikipedia.org/wiki/Turnstile_antenna) appeared to be the most popular. The turnstile looked easier to construct given the limited materials I had at hand, so I decided to go with that. 
+There were several possibilities for satellite antennas, but the quadrifilar helix (QFH) and [turnstile](https://en.wikipedia.org/wiki/Turnstile_antenna) appeared to be the most popular. The turnstile looked easier to construct given the limited materials I had at hand, so I decided to go with that. 
 
 There are several plans online for turnstile antennas, but I chose [this one from an Italian amateur radio enthusiast](http://www.radioamatoripeligni.it/i6ibe/pdf/noaa897.pdf) (see page 8 of the PDF).
 

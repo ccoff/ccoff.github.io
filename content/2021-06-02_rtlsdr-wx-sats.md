@@ -128,3 +128,5 @@ In addition to the NOAA and Meteor polar-orbiting satellites, there are also wea
 
 So many satellites, so little time...
 
+[**UPDATE**: See my May 2023 post ["Chasing weather satellites: the sequel"](https://ccoff.github.io/chasing-weather-satellites-sequel) for further adventures with weather satellites.]
+

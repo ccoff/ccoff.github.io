@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Chasing weather satellites: the sequel &mdash; 0xCC0FF</title>
+  <meta name="author" content="Chris Coffey (ccoff)">
+
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://ccoff.github.io/favicon.png" rel="icon">
+
+  <link href="https://ccoff.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <!-- Matomo -->
+  <script type="text/javascript">
+    var _paq = window._paq = window._paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//wanderingwalrus.com/matomo/";
+      _paq.push(['setTrackerUrl', u+'matomo.php']);
+      _paq.push(['setSiteId', '2']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Matomo Code -->
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://ccoff.github.io/">0xCC0FF</a></h1>
+    <h2>A companion blog to my GitHub account</h2>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/pages/about">About</a></li>
+    <li><a href="/pages/rss">RSS</a></li>
+      <li class="active">
+        <a href="https://ccoff.github.io/category/blog">Blog</a>
+      </li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">Chasing weather satellites: the sequel</h1>
+    <p class="meta">
+<time datetime="2023-05-14T00:00:00+01:00" pubdate>Sun 14 May 2023</time>    </p>
+</header>
+
+  <div class="entry-content"><p>This is a follow-up to my previous post about using <a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr">software-defined radio (SDR) to download real-time data from weather satellites</a>. I wrapped up that post with "there are several other types of satellite antennas worth exploring -- the double-cross and Moxon turnstile antennas look like they may be an improvement on the basic turnstile."</p>
+<p>Since writing that, I built a prototype Moxon turnstile that performed about as well as the basic turnstile I constructed. I was considering building a quadrifilar helix (QFH) antenna, which is regarded by many as the gold standard for weather satellite reception (and has a great name). But then I came across the <a href="https://www.reddit.com/r/RTLSDR/comments/v07fn9/ive_been_experimenting_with_an_asymmetric/">asymmetric turnstile antenna (ATA)</a>, a type I had not heard of before.</p>
+<p>The ATA is a kind of hybrid between a QFH and traditional turnstile. Like a QFH, it has asymmetric lengths for its elements, and is shorted (i.e., the cable's shield is connected to its center conductor). Like a turnstile, the ATA has four straight elements radiating outward and a reflector. It seems to offer the best of both worlds -- the performance of a QFH with simplified construction. (Even easier construction than a traditional turnstile in fact -- there's no phasing harness to worry about with the ATA design).</p>
+<p>According to <a href="https://sgcderek.github.io/tools/ATA.html">sgcderek's guide</a>, the ATA is more commonly used at higher frequencies, and relatively unexplored down in VHF where the NOAA satellites transmit APT. Which helps explain why I hadn't heard of it before. In any event, I built a prototype antenna, got it up on the roof, and the results were, in a word, excellent. I started getting usable signal at around 3° elevation, which meant I could capture almost an entire pass, save for 15-30 seconds on either end. Gain was also very good, with SNR levels reaching as high as 55 dB. (In my experience, an SNR of 20 to 25 dB produces usable, but noisy imagery. Anything above 30 dB produces reliably clean, noise-free imagery.)</p>
+<p>I'm in an urban setting with some obstructions on the horizon and a noisy RF environment. But for the high, medium, and low passes shown below, I only used a basic setup (no filters or LNA). The results were impressive:</p>
+<figure>
+<a href="images/wxsat-2-2023-03-19-08-54-noaa-19-maxel-74.4E.jpg"><img src="images/wxsat-2-2023-03-19-08-54-noaa-19-maxel-74.4E.jpg" alt="Image: NOAA-19 high pass" width="520" /></a>
+<figcaption>High pass (74.4° max elevation): NOAA-19, March 19, 2023 at 07:54 UTC.</figcaption>
+</figure>
+
+<figure>
+<a href="images/wxsat-2-2023-05-12-09-49-noaa-19-maxel-39.6W.jpg"><img src="images/wxsat-2-2023-05-12-09-49-noaa-19-maxel-39.6W.jpg" alt="Image: NOAA-19 medium pass" width="520" /></a>
+<figcaption>Medium pass (39.6° max elevation): NOAA-19, May 12, 2023 at 08:49 UTC.</figcaption>
+</figure>
+
+<figure>
+<a href="images/wxsat-2-2023-04-14-12-56-noaa-18-maxel-8.7W.jpg"><img src="images/wxsat-2-2023-04-14-12-56-noaa-18-maxel-8.7W.jpg" alt="Image: NOAA-18 low pass" width="520" /></a>
+<figcaption>Low pass (8.7° max elevation): NOAA-18, April 14, 2023 at 11:56 UTC.</figcaption>
+</figure>
+
+<p>Over eight minutes of imagery from an 8.7° maximum elevation pass is pretty darn good, and would be unthinkable with my V-dipole or traditional turnstile antenna. Those antennas typically only started capturing usable data at around 20° elevation, or even higher.</p>
+<p>Here is the antenna up on the roof (with my ADS-B and HF antennas visible as well):</p>
+<figure>
+<a href="images/wxsat-2-antenna.jpg"><img src="images/wxsat-2-antenna.jpg" alt="Image: ATA antenna on roof" width="520" /></a>
+</figure>
+
+<h2>But wait, there's more</h2>
+<p>The antenna works well for more than just NOAA sats. The <a href="https://en.wikipedia.org/wiki/International_Space_Station">ISS</a> has a packet repeater that transmits <a href="https://en.wikipedia.org/wiki/Automatic_Packet_Reporting_System">APRS</a> data at around 145 MHz, and the antenna picked it up with ease:</p>
+<div class="highlight"><pre><span></span><code>APRS: IK3ZGB-2&gt;CQ,RS0ISS*:=4542.75N/01142.00E`73&#39; Via ISS de Cris {UISS54}
+APRS: 9H1FF&gt;APRS,RS0ISS*::IW6PUA   :msg rcvd tnx
+APRS: RS0ISS&gt;0P0PS4,APRSAT:&#39;v&amp;l SI]ARISS-International Space Station=
+APRS: OE1WTR&gt;CQ,RS0ISS*,WIDE2-2,QAR::I3JUK    :73&#39; Via Satellite
+APRS: 9H1FF&gt;APRS,RS0ISS*:=/&lt;@16R-]&amp;/  B
+APRS: IW6PUA&gt;CQ,RS0ISS*::9H1FF    :HELLO, QSL and 73 via ISS
+APRS: IW6PUA&gt;CQ,RS0ISS*:=4152.25N/01404.00E-Matteo via ISS
+APRS: ON4BN&gt;ALL,RS0ISS*,NA1SS,PSAT:=5103.45N/00522.30Er73&#39; Via Satellite de ON4BN
+APRS: 9H1FF&gt;APRS,RS0ISS*:Greetings to all from Malta
+APRS: 4Z4DP&gt;SQTQ90,RS0ISS*:&#39;?_Dl `/]73 from Jerusalem=
+</code></pre></div>
+
+<p>The antenna also does well with <a href="https://en.wikipedia.org/wiki/Automatic_identification_system">AIS</a> transmissions from maritime traffic, which are broadcast at around 162 MHz:</p>
+<figure>
+<a href="images/wxsat-2-ais-opencpn.png"><img src="images/wxsat-2-ais-opencpn.png" alt="Image: Displaying AIS ship data on OpenCPN" width="520" /></a>
+<figcaption>AIS data plotted on a map with the <a href="https://opencpn.org/">OpenCPN</a> program.</figcaption>
+</figure>
+
+<p>All things considered, I'm quite impressed with the ATA's performance, and it will be my "go-to" antenna for NOAA APT reception from now on. It appears to provide comparable performance levels to a QFH, and is easier to build.</p>
+<p>That said, I'm never satisfied. There are some obstructions on the horizon that block the signal; there's not much I can do about that. However, I also see telltale wavy lines in some of the images that are indicators of RF interference, perhaps from power lines. There are <a href="https://www.nooelec.com/store/sawbird-plus-noaa-308.html">combined LNA/filters</a> for NOAA sats to help improve reception, but I don't need more gain from an LNA -- this antenna provides plenty of gain. But I would like to see if a 137 MHz bandpass filter cuts down on the RF interference at all. Somewhat surprisingly I haven't found any standalone bandpass filters for that frequency, so I may just try to build one myself.</p></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Chris Coffey (ccoff)
+    </span>
+  </span>
+<time datetime="2023-05-14T00:00:00+01:00" pubdate>Sun 14 May 2023</time>  <span class="categories">
+    <a class='category' href='https://ccoff.github.io/category/blog'>blog</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://ccoff.github.io/tag/radio">radio</a>,    <a class="category" href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a class="category" href="https://ccoff.github.io/tag/satellites">satellites</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://ccoff.github.io/chasing-weather-satellites-sequel">Chasing weather satellites: the sequel</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/binary-patching">Binary patching for fun and zero profit</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/listening-to-shortwave-with-sdr">Not your father's radio: listening to shortwave with software-defined radio</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/chasing-weather-satellites-with-sdr">Chasing weather satellites with software-defined radio</a>
+      </li>
+      <li class="post">
+          <a href="https://ccoff.github.io/customizing-live-iso-image">Customizing a live ISO image</a>
+      </li>
+    </ul>
+  </section>
+  <!--
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://ccoff.github.io/category/blog">blog</a></li>
+    </ul>
+  </section>
+  -->
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://ccoff.github.io/tag/radio">radio</a>,    <a href="https://ccoff.github.io/tag/sdr">sdr</a>,    <a href="https://ccoff.github.io/tag/satellites">satellites</a>,    <a href="https://ccoff.github.io/tag/linux">linux</a>,    <a href="https://ccoff.github.io/tag/reverse-engineer">reverse engineer</a>,    <a href="https://ccoff.github.io/tag/shortwave">shortwave</a>,    <a href="https://ccoff.github.io/tag/iso">iso</a>,    <a href="https://ccoff.github.io/tag/live-image">live image</a>,    <a href="https://ccoff.github.io/tag/hardware">hardware</a>,    <a href="https://ccoff.github.io/tag/uart">UART</a>,    <a href="https://ccoff.github.io/tag/repair">repair</a>,    <a href="https://ccoff.github.io/tag/monitor">monitor</a>,    <a href="https://ccoff.github.io/tag/imap">imap</a>,    <a href="https://ccoff.github.io/tag/e-mail">e-mail</a>,    <a href="https://ccoff.github.io/tag/php">php</a>,    <a href="https://ccoff.github.io/tag/accessibility">accessibility</a>,    <a href="https://ccoff.github.io/tag/hci">hci</a>,    <a href="https://ccoff.github.io/tag/opencv">opencv</a>,    <a href="https://ccoff.github.io/tag/python">python</a>,    <a href="https://ccoff.github.io/tag/sensors">sensors</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://github.com/ccoff">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy; 2023 Chris Coffey (ccoff) &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://ccoff.github.io/theme/js/ender.js"></script>
+  <script src="https://ccoff.github.io/theme/js/octopress.js" type="text/javascript"></script>
+</body>
+</html>

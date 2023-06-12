@@ -54,11 +54,11 @@ APRS: 9H1FF>APRS,RS0ISS*:Greetings to all from Malta
 APRS: 4Z4DP>SQTQ90,RS0ISS*:'?_Dl `/]73 from Jerusalem=
 ```
 
-The antenna also does well with [AIS](https://en.wikipedia.org/wiki/Automatic_identification_system) transmissions from maritime traffic, which are broadcast at around 162 MHz:
+The antenna also does well with [AIS](https://en.wikipedia.org/wiki/Automatic_identification_system) transmissions from maritime traffic, which are broadcast at around 162 MHz. Incredibly I picked up some ships hundreds of nautical miles away:
 
 <figure>
-<a href="images/wxsat-2-ais-opencpn.png"><img src="images/wxsat-2-ais-opencpn.png" alt="Image: Displaying AIS ship data on OpenCPN" width="520" /></a>
-<figcaption>AIS data plotted on a map with the <a href="https://opencpn.org/">OpenCPN</a> program.</figcaption>
+<a href="images/wxsat-2-ais-AIS-catcher.png"><img src="images/wxsat-2-ais-AIS-catcher.png" alt="Image: Displaying AIS ship data with AIS Catcher" width="720" /></a>
+<figcaption>AIS data plotted on a map with <a href="https://github.com/jvde-github/AIS-catcher">AIS Catcher</a>.</figcaption>
 </figure>
 
 All things considered, I'm quite impressed with the ATA's performance, and it will be my "go-to" antenna for NOAA APT reception from now on. It appears to provide comparable performance levels to a QFH, and is easier to build.

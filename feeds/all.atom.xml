@@ -39,10 +39,10 @@ APRS: 9H1FF&amp;gt;APRS,RS0ISS*:Greetings to all from Malta
 APRS: 4Z4DP&amp;gt;SQTQ90,RS0ISS*:&amp;#39;?_Dl `/]73 from Jerusalem=
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The antenna also does well with &lt;a href="https://en.wikipedia.org/wiki/Automatic_identification_system"&gt;AIS&lt;/a&gt; transmissions from maritime traffic, which are broadcast at around 162 MHz:&lt;/p&gt;
+&lt;p&gt;The antenna also does well with &lt;a href="https://en.wikipedia.org/wiki/Automatic_identification_system"&gt;AIS&lt;/a&gt; transmissions from maritime traffic, which are broadcast at around 162 MHz. Incredibly I picked up some ships hundreds of nautical miles away:&lt;/p&gt;
 &lt;figure&gt;
-&lt;a href="images/wxsat-2-ais-opencpn.png"&gt;&lt;img src="images/wxsat-2-ais-opencpn.png" alt="Image: Displaying AIS ship data on OpenCPN" width="520" /&gt;&lt;/a&gt;
-&lt;figcaption&gt;AIS data plotted on a map with the &lt;a href="https://opencpn.org/"&gt;OpenCPN&lt;/a&gt; program.&lt;/figcaption&gt;
+&lt;a href="images/wxsat-2-ais-AIS-catcher.png"&gt;&lt;img src="images/wxsat-2-ais-AIS-catcher.png" alt="Image: Displaying AIS ship data with AIS Catcher" width="720" /&gt;&lt;/a&gt;
+&lt;figcaption&gt;AIS data plotted on a map with &lt;a href="https://github.com/jvde-github/AIS-catcher"&gt;AIS Catcher&lt;/a&gt;.&lt;/figcaption&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;All things considered, I'm quite impressed with the ATA's performance, and it will be my "go-to" antenna for NOAA APT reception from now on. It appears to provide comparable performance levels to a QFH, and is easier to build.&lt;/p&gt;

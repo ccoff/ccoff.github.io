@@ -54,7 +54,7 @@ APRS: 9H1FF>APRS,RS0ISS*:Greetings to all from Malta
 APRS: 4Z4DP>SQTQ90,RS0ISS*:'?_Dl `/]73 from Jerusalem=
 ```
 
-The antenna also does well with [AIS](https://en.wikipedia.org/wiki/Automatic_identification_system) transmissions from maritime traffic, which are broadcast at around 162 MHz. Incredibly I picked up some ships hundreds of nautical miles away:
+The antenna also does well with [AIS](https://en.wikipedia.org/wiki/Automatic_identification_system) transmissions from maritime traffic, which are broadcast at around 162 MHz. Incredibly I picked up some ships hundreds of nautical miles away (almost certainly with an assist from [tropospheric propagation](https://en.wikipedia.org/wiki/Tropospheric_propagation)):
 
 <figure>
 <a href="images/wxsat-2-ais-AIS-catcher.png"><img src="images/wxsat-2-ais-AIS-catcher.png" alt="Image: Displaying AIS ship data with AIS Catcher" width="720" /></a>

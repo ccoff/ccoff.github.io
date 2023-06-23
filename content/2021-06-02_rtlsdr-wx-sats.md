@@ -4,6 +4,9 @@ Tags: radio, sdr, satellites
 Slug: chasing-weather-satellites-with-sdr
 Date: 2021-06-02
 
+
+[**UPDATE**: Also check out my May 2023 post ["Chasing weather satellites: the sequel"](https://ccoff.github.io/chasing-weather-satellites-sequel) for further satellite adventures.]
+
 No matter where you are on Earth, several weather satellites pass overhead at least twice a day, broadcasting real-time imagery of what they see below. The most well-known of these satellites, at least in amateur radio circles, are the American NOAA and Russian Meteor satellites.
 
 The NOAA satellites (there are currently three of them, NOAA-15, -18, and -19) broadcast at around 137 MHz in the analog [Automatic Picture Transmission (APT)](https://en.wikipedia.org/wiki/Automatic_picture_transmission) format. (They also broadcast digital formats at a much higher frequency, but that requires a high-gain antenna with a way to track the satellite as it passes over, significantly complicating the task.) The Russian Meteor-M 2 satellite also broadcasts around 137 MHz, but in the digital [low-rate picture transmission (LRPT)](https://en.wikipedia.org/wiki/Low-rate_picture_transmission) format. By way of comparison, digital LRPT has a resolution of 1 km/pixel, while analog APT is 4km/pixel.
@@ -128,5 +131,5 @@ In addition to the NOAA and Meteor polar-orbiting satellites, there are also wea
 
 So many satellites, so little time...
 
-[**UPDATE**: See my May 2023 post ["Chasing weather satellites: the sequel"](https://ccoff.github.io/chasing-weather-satellites-sequel) for further adventures with weather satellites.]
+[**UPDATE**: Also check out my May 2023 post ["Chasing weather satellites: the sequel"](https://ccoff.github.io/chasing-weather-satellites-sequel) for further satellite adventures.]
 

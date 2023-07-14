@@ -8,15 +8,15 @@ I use software-defined radio (SDR) to download [real-time data from weather sate
 
 wxtoimg is closed-source, so changing the source code and recompiling wasn't an option. I could have written a cron job to fetch the updated satellite data and move it to the configuration folder. But it seemed like it would be easy enough to just patch the program itself to use *celestrak.org* instead of *celestrak.com* and be done with it, with no need for external workarounds.
 
-For the uninitiated, you can alter a program's behavior by making relatively small changes direcly to its code (also known as "patching a binary"). Sometimes this is for purely malicious purposes, but in my case, I wanted to fix a bug that otherwise could not be fixed because the source code was not available.
+For the uninitiated, you can alter a program's behavior by making relatively small changes directly to its code (also known as "patching a binary"). Sometimes this is for purely malicious purposes, but in my case, I wanted to fix a bug that otherwise could not be fixed because the source code was not available.
 
 ## Try the easy things first
 
-I hoped and assumed that "celestrak.com" was just a string in the **.data** or **.rodata** sections of the executable, and therefore easy to modify with a hex editor. But an initial search with the *strings* utility didn't turn up anything. So I wrote a short program in C to look for various byte patterns. Again nothing. Next I tried [flare-floss](https://github.com/mandiant/flare-floss), which does deep searches of executables for obfuscated strings. Same result-- nothing.
+I hoped and assumed that "celestrak.com" was just a string in the **.data** or **.rodata** sections of the executable that I could modify with a hex editor. But an initial search with the *strings* utility didn't turn up anything. So I wrote a short program in C to look for various byte patterns. Again nothing. Next I tried [flare-floss](https://github.com/mandiant/flare-floss), which does deep searches of executables for obfuscated strings. Same result -- nothing.
 
 The string had to be in there somewhere, but where?
 
-I ran [strace](https://strace.io) to see what exactly wxtoimg was doing, and sure enough there was an HTTP GET request to celestrak.com (104.168.149.178) to get the satellite data:
+I ran [strace](https://strace.io) to see what exactly wxtoimg was doing, and as expected there was an HTTP GET request to celestrak.com (104.168.149.178) to get the satellite data:
 
 ```text
 connect(8, {sa_family=AF_INET, sin_port=htons(80), sin_addr=inet_addr("104.168.149.178")}, 16) = 0
@@ -26,11 +26,11 @@ recv(8, "HTTP/1.1 301 Moved Permanently\r\n"..., 4096, 0) = 408
 close(8)                                = 0
 ```
 
-As one would expect, a **send()** call was used to get the satellite data file. It was clear, however, that a simple hex edit replacing "com" with "org" wasn't in the cards. I was going to have to dig deeper and do some [static analysis](https://en.wikipedia.org/wiki/Static_program_analysis) on the wxtoimg executable.
+A regular **send()** call was used to get the satellite data file. It was clear, however, that a simple hex edit replacing "com" with "org" wasn't in the cards. I was going to have to dig deeper and do some [static analysis](https://en.wikipedia.org/wiki/Static_program_analysis) on the wxtoimg executable.
 
 ## Static analysis
 
-Static analysis involves examining the disassembled executable without running it. But first I needed to determine what exactly I was dealing with:
+Static analysis involves examining the disassembled executable without running it. First I determined what exactly I was dealing with:
 
 ```text
 chris@host:~$ file /usr/local/bin/wxtoimg
@@ -39,7 +39,7 @@ chris@host:~$ file /usr/local/bin/wxtoimg
 
 It was a 32-bit executable. I was happy about that, because at the assembly code level I've worked almost entirely in the 16- and 32-bit space --  64-bit not so much. (Back in the late 90's/early 00's, to put food on the table I worked on 16-bit DOS and 32-bit Linux embedded telecom products.)
 
-To do static analysis you need a good disassembler, and in my case, one that also ran on Linux and handled [ELF executables](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format). In the last few years a new player has arrived on the software reverse engineering scene courtesy of the NSA (yes, *that* NSA): [Ghidra](https://ghidra-sre.org). I had never used Ghidra before, but it looked promising with lots of useful features. And unlike other comparable programs that cost hundreds of dollars, it was free.
+To do static analysis you need a good disassembler, and in my case, one that also ran on Linux and handled [ELF executables](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format). In the last few years a new player has arrived on the software reverse engineering scene courtesy of the NSA (yes, *that* NSA): [Ghidra](https://ghidra-sre.org). I had never used Ghidra before, but it looked promising with lots of useful features. And unlike other comparable programs costing hundreds of dollars, it was free.
 
 I loaded up wxtoimg in Ghidra, which took a few minutes to disassemble and analyze its code. The Code Browser gave me a list of disassembled functions, a memory map showing the program sections (**.text**, etc), and other useful goodies.
 
@@ -61,7 +61,7 @@ I hadn't examined a stack at byte level in about 20 years and was rusty. Dredgin
 ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 ```
 
-The second parameter (**buf*) contains the data to send, and this is what I was interested in. On the 32-bit x86 architecture, the calling convention places function parameters on the stack as follows:
+The second parameter (**buf*) contains the data to send, and this is what I was interested in. To get that parameter's value though, I had to go to the right place in memory. On the 32-bit x86 architecture, the calling convention places function parameters on the stack as follows:
 
 ```
 Towards the top of the stack (lower memory addresses)
@@ -104,10 +104,10 @@ But that gave me an idea -- I downloaded the Tcl source code and found that some
 
 I continued working through the call stack, but started getting lost in a maze of function calls trying to determine where "celestrak.com" came from. It seemed that the embedded Tcl script files were obfuscated in the executable at rest and loaded on the fly. As I continued to work through the function calls it occurred to me that:
 
- 1. Even when I found the script, I may not be able to reverse-engineer the obfuscation algorithm to patch it correctly.
+ 1. Even when I found the right Tcl script, I may not be able to reverse-engineer the obfuscation algorithm to patch it correctly.
  2. Even if I patched that particular script in the executable, what if another script somewhere else in the program used a hard-coded "celestrak.com" string? I'd have to repeat the process all over again.
 
-I decided it was easier to intercept the "celestrak.com" hostname string later in the call stack, closer to where it was actually used to open a network connection. In other words, instead of patching an embedded, obfuscated Tcl script in the executable, I would patch the embedded Tcl network library code itself to use the correct hostname.
+For these reasons, I decided it was easier to intercept the "celestrak.com" hostname string later in the call stack, closer to where it was actually used to open a network connection. In other words, instead of patching an embedded, obfuscated Tcl script in the executable, I would patch the embedded Tcl network library code itself to use the correct hostname.
 
 ## Making the patch
 Patching a binary is not a simple thing. Pitfalls are everywhere: one wrong bit or byte, a miscalculation in a jump, or any other number of slip-ups, and the program will at a minimum exhibit unexpected behavior, or more likely, segfault and crash.
@@ -123,11 +123,11 @@ I wrote up the patch code in C, compiled it, and then used [objdump](https://en.
   3e:	f3 a4                	rep movs BYTE PTR es:[edi],BYTE PTR ds:[esi]
 ```
 
-This gave me a starting point to work from for the assembly code and associated opcodes that would become the patch. But there was still a lot of work to do, not the least of which was determining *where* to place the patch in the executable. My patch (i.e., the sequence of raw opcodes) worked out to 81 bytes in total. I needed to find that much unused space -- also known as a [code cave](https://en.wikipedia.org/wiki/Code_cave) -- in the executable.
+This gave me a starting point to work from for the assembly code and its associated opcodes that would become the patch. But there was still a lot of work to do, not the least of which was determining *where* to place the patch in the executable. My patch (i.e., the sequence of raw opcodes) worked out to 81 bytes in total. I needed to find that much unused space -- also known as a [code cave](https://en.wikipedia.org/wiki/Code_cave) -- in the executable.
 
-I used the [gocave](https://github.com/guitmz/gocave) program, which just looks for sequences of repeating null bytes in an executable. The largest cave it found in the **.text** section was 7 bytes -- nowhere near large enough to hold my patch. The **.data** and **.rodata** sections, on the other hand, had large caves, but the sections weren't marked as executable. I didn't really want to mess with the executable's section headers, whether by changing read/write/execute permissions, expanding an existing section, or creating an entirely new one. I was out of luck, or so it seemed...
+I used the [gocave](https://github.com/guitmz/gocave) program, which just looks for sequences of repeating null bytes in an executable. The largest cave it found in the **.text** section was 7 bytes -- nowhere near large enough to hold my patch code. The **.data** and **.rodata** sections, on the other hand, had large caves, but the sections weren't marked as executable. I didn't really want to mess with the executable's section headers, whether by changing read/write/execute permissions, expanding an existing section, or creating an entirely new one. It seemed I was out of luck...
 
-As mentioned above, I was able to correlate some code sections with Tcl library functions. One of those functions was [**Tcl_SocketObjCmd()**](https://core.tcl-lang.org/tcl/file?name=generic/tclIOCmd.c), which opened a client socket to the specified hostname. But the function also contained several code blocks for server sockets, for example:
+But as mentioned above, I was able to correlate some code sections with Tcl library functions. One of those functions was [**Tcl_SocketObjCmd()**](https://core.tcl-lang.org/tcl/file?name=generic/tclIOCmd.c), which opened a client socket to the specified hostname. But the function also contained several code blocks for server sockets, for example:
 
 ```
  if (server) {
@@ -148,16 +148,16 @@ As mentioned above, I was able to correlate some code sections with Tcl library 
 
 wxtoimg was just a TCP client though, so those blocks of server code were unused and taking up space -- space I could put to good use. That particular server code block above occupied 201 bytes, which was more than enough room for my 81-byte patch. And crucially, one of the parameters for the **Tcl_SocketObjCmd()** function was the target hostname ("celestrak.com").
 
-So I had my binary patch code, and somewhere to put it. Still, I couldn't just drop the bytecode into the executable; doing so would surely cause it to blow up in spectacular fashion. Instead I had to do some careful hand-tweaking so it played nicely with the rest of the executable. For example:
+So I had my binary patch code, and somewhere to put it. Still, I couldn't just drop the bytecode into the executable; doing so would surely cause it to blow up in spectacular fashion. Instead I had to do some careful hand-tweaking of the code so it played nicely with the rest of the executable. For example:
 
- * Jump offset values: These had to be manually calculated to make sure jumps went to the right code locations.
+ * Jump offset values: These had to be manually calculated to ensure jumps went to the right locations.
  * Stack/register maintenance: Any registers or flags that the patch code changed had to be saved in advance and later restored. This ensured that the existing code had no idea my patch was ever there.
 
 If this sounds like a laborious process, you're right. There's a reason we use compilers to do this dirty work for us whenever possible.
 
-I made the necessary adjustments, copied the bytecode into the executable, and was finally ready to run the patched wxtoimg. Did it work? Of course not. Code never works perfectly the first time through, at least not mine. Especially when working with raw bytecode. When I went to the option in wxtoimg to update the satellite data, the program hung.
+I made the necessary adjustments, copied the bytecode into the executable, and was finally ready to run the patched wxtoimg. Did it work? Of course not. Code never works perfectly the first time through, at least not mine. Especially when working with raw bytecode. When I went to the option in wxtoimg to update the satellite data, the GUI just hung.
 
-When I added my patch code, I had overwritten all of the remaining unused server code with [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). But some of what was seemingly unused server code was in fact referenced by binary code branches elsewhere, effectively leaving "hanging" branches that went to nowhere. I didn't know for sure, but I was guessing that even though the program was not actually executing those hanging branches, the CPU was still following them due to [predictive execution](https://en.wikipedia.org/wiki/Branch_predictor). Because I had invalidated some of those paths with NOPs, the program hung.
+When I added my patch code to the binary, I had overwritten all of the remaining unused server code with [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). But Ghidra indicated that some of what was seemingly unused server code was in fact referenced by binary code branches elsewhere. I had effectively left "hanging" branches that went to nowhere. I didn't know for sure, but I was guessing that even though the program was not actually executing those hanging branches, the CPU was still following them due to [predictive execution](https://en.wikipedia.org/wiki/Branch_predictor). Because I had invalidated some of those paths with NOPs, the program hung.
 
 I may be totally wrong about this; I'm not an expert in CPU design. What I do know is that I scaled back my NOP padding, retaining the server code that was referenced by another branch (luckily there was still plenty of space for my patch). And this time -- it worked! My patch stepped in anytime a socket to celestrak.com was requested, and opened it at celestrak.org instead:
 

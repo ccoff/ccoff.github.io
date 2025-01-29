@@ -101,39 +101,39 @@ close(8)                                = 0
 <p>What really gave me deeper knowledge of the stack, however, was the excellent article <a href="https://www.eecs.umich.edu/courses/eecs588/static/stack_smashing.pdf">"Smashing the stack for fun and profit"</a>, which first appeared in 1996. The intended audience was those looking to spawn shell code from within a vulnerable executable. Namely, by overwriting parts of the stack via buffer overflow exploits (AKA "smashing the stack"). But the same principles of stack layouts used in cracking applied equally to reverse engineering and non-malicious binary patching.</p>
 <p>Fast forward to the present. In Ghidra I set a breakpoint on <strong>send()</strong>, started wxtoimg, and selected the option to update the satellite data. The debugger (Ghidra uses <a href="https://www.sourceware.org/gdb">gdb</a> under the hood) stopped and now I had the call stack backtrace.</p>
 <p>I hadn't examined a stack at byte level in about 20 years and was rusty. Dredging up my stack-smashing knowledge from days of yore, I looked at the <strong>EBP</strong> register to get the base pointer. Then I went to that address in Ghidra's memory viewer to get to the entry point of the <strong>send()</strong> call. The <a href="https://linux.die.net/man/2/send"><strong>send()</strong> function</a> has the following call signature:</p>
-<div class="highlight"><pre><span></span><code><span class="n">ssize_t</span> <span class="n">send</span><span class="p">(</span><span class="nb nb-Type">int</span> <span class="n">sockfd</span><span class="p">,</span> <span class="k">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="nb nb-Type">int</span> <span class="n">flags</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="n">ssize_t</span><span class="w"> </span><span class="n">send</span><span class="p">(</span><span class="nb nb-Type">int</span><span class="w"> </span><span class="n">sockfd</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="nb nb-Type">void</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="nb nb-Type">int</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span>
 </code></pre></div>
 
 <p>The second parameter (*<em>buf</em>) contains the data to send, and this is what I was interested in. To get that parameter's value though, I had to go to the right place in memory. On the 32-bit x86 architecture, the calling convention places function parameters on the stack as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="n">Towards</span> <span class="n">the</span> <span class="n">top</span> <span class="n">of</span> <span class="n">the</span> <span class="n">stack</span> <span class="p">(</span><span class="n">lower</span> <span class="n">memory</span> <span class="n">addresses</span><span class="p">)</span>
-         <span class="o">.</span>
-       <span class="o">.</span><span class="p">:::</span><span class="o">.</span>
-     <span class="o">.</span><span class="p">:::::::</span><span class="o">.</span>
-       <span class="p">:::::</span>
-       <span class="p">:::::</span>
+<div class="highlight"><pre><span></span><code><span class="c">Towards the top of the stack (lower memory addresses)</span>
+<span class="c">         </span><span class="nt">.</span>
+<span class="c">       </span><span class="nt">.</span><span class="c">:::</span><span class="nt">.</span>
+<span class="c">     </span><span class="nt">.</span><span class="c">:::::::</span><span class="nt">.</span>
+<span class="c">       :::::</span>
+<span class="c">       :::::</span>
 
-<span class="n">Additional</span> <span class="n">local</span> <span class="n">variables</span><span class="p">,</span> <span class="n">etc</span><span class="o">...</span>
-<span class="o">---------------------------------</span>
-<span class="n">Local</span> <span class="n">variable</span>      <span class="p">(</span><span class="n">EBP</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Base</span> <span class="n">pointer</span>        <span class="p">(</span><span class="n">EBP</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Return</span> <span class="n">address</span>      <span class="p">(</span><span class="n">EBP</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Parameter</span> <span class="mi">1</span>         <span class="p">(</span><span class="n">EBP</span> <span class="o">+</span> <span class="mi">8</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Parameter</span> <span class="mi">2</span>         <span class="p">(</span><span class="n">EBP</span> <span class="o">+</span> <span class="mi">12</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Parameter</span> <span class="mi">3</span>         <span class="p">(</span><span class="n">EBP</span> <span class="o">+</span> <span class="mi">16</span><span class="p">)</span>
-<span class="o">---------------------------------</span>
-<span class="n">Additional</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">etc</span><span class="o">...</span>
+<span class="c">Additional local variables</span><span class="nt">,</span><span class="c"> etc</span><span class="nt">...</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Local variable      (EBP </span><span class="nb">-</span><span class="c"> 4)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Base pointer        (EBP)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Return address      (EBP </span><span class="nb">+</span><span class="c"> 4)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Parameter 1         (EBP </span><span class="nb">+</span><span class="c"> 8)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Parameter 2         (EBP </span><span class="nb">+</span><span class="c"> 12)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Parameter 3         (EBP </span><span class="nb">+</span><span class="c"> 16)</span>
+<span class="nb">---------------------------------</span>
+<span class="c">Additional parameters</span><span class="nt">,</span><span class="c"> etc</span><span class="nt">...</span>
 
-       <span class="p">:::::</span>
-       <span class="p">:::::</span>
-     <span class="o">..</span><span class="p">:::::</span><span class="o">..</span>
-      <span class="s1">&#39;:::::&#39;</span>
-        <span class="s1">&#39;:&#39;</span>
-<span class="n">Towards</span> <span class="n">the</span> <span class="n">bottom</span> <span class="n">of</span> <span class="n">the</span> <span class="n">stack</span> <span class="p">(</span><span class="n">higher</span> <span class="n">memory</span> <span class="n">addresses</span><span class="p">)</span>
+<span class="c">       :::::</span>
+<span class="c">       :::::</span>
+<span class="c">     </span><span class="nt">..</span><span class="c">:::::</span><span class="nt">..</span>
+<span class="c">      &#39;:::::&#39;</span>
+<span class="c">        &#39;:&#39;</span>
+<span class="c">Towards the bottom of the stack (higher memory addresses)</span>
 </code></pre></div>
 
 <p>So by adding 12 bytes to <strong>EBP</strong>, I had the address to the second parameter *<em>buf</em>. And that contained the HTTP GET request for the satellite data, confirming I was in the right place.</p>
@@ -149,29 +149,29 @@ close(8)                                = 0
 <p>Patching a binary is not a simple thing. Pitfalls are everywhere: one wrong bit or byte, a miscalculation in a jump, or any other number of slip-ups, and the program will at a minimum exhibit unexpected behavior, or more likely, segfault and crash.</p>
 <p>At a macro level, all I wanted to do was look at the hostname string used to open a connection, and if it matched "celestrak.com" replace it with "celestrak.org". But there were some complications. I wanted my patch to be in complete control of the registers, and also avoid using any local variables. That meant avoiding function calls to library routines like <strong>strcmp()</strong> and <strong>strcpy()</strong>, and using instead a self-contained block of code that did the string manipulations with no "outside" interference.</p>
 <p>I wrote up the patch code in C, compiled it, and then used <a href="https://en.wikipedia.org/wiki/Objdump">objdump</a> to disassemble it. For example, here's the portion of the patch that copies the correct string to the hostname (because of my DOS days, I "think" in Intel assembly syntax instead of AT&amp;T syntax, so that's what appears below):</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="mi">32</span><span class="err">:</span><span class="w">   </span><span class="mi">8</span><span class="n">d</span><span class="w"> </span><span class="n">b3</span><span class="w"> </span><span class="n">d0</span><span class="w"> </span><span class="n">a5</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="n">ff</span><span class="w">       </span><span class="n">lea</span><span class="w">    </span><span class="n">esi</span><span class="p">,</span><span class="o">[</span><span class="n">ebx-0x3d5a30</span><span class="o">]</span><span class="w"></span>
-<span class="w">  </span><span class="mi">38</span><span class="err">:</span><span class="w">   </span><span class="n">b9</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w">          </span><span class="n">mov</span><span class="w">    </span><span class="n">ecx</span><span class="p">,</span><span class="mh">0x12</span><span class="w"></span>
-<span class="w">  </span><span class="mi">3</span><span class="nl">d</span><span class="p">:</span><span class="w">   </span><span class="n">fc</span><span class="w">                      </span><span class="n">cld</span><span class="w"></span>
-<span class="w">  </span><span class="mi">3</span><span class="nl">e</span><span class="p">:</span><span class="w">   </span><span class="n">f3</span><span class="w"> </span><span class="n">a4</span><span class="w">                   </span><span class="n">rep</span><span class="w"> </span><span class="n">movs</span><span class="w"> </span><span class="n">BYTE</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="nl">es</span><span class="p">:</span><span class="o">[</span><span class="n">edi</span><span class="o">]</span><span class="p">,</span><span class="n">BYTE</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="nl">ds</span><span class="p">:</span><span class="o">[</span><span class="n">esi</span><span class="o">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="mi">32</span><span class="err">:</span><span class="w">   </span><span class="mi">8</span><span class="n">d</span><span class="w"> </span><span class="n">b3</span><span class="w"> </span><span class="n">d0</span><span class="w"> </span><span class="n">a5</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="n">ff</span><span class="w">       </span><span class="n">lea</span><span class="w">    </span><span class="n">esi</span><span class="p">,</span><span class="o">[</span><span class="n">ebx-0x3d5a30</span><span class="o">]</span>
+<span class="w">  </span><span class="mi">38</span><span class="err">:</span><span class="w">   </span><span class="n">b9</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w">          </span><span class="n">mov</span><span class="w">    </span><span class="n">ecx</span><span class="p">,</span><span class="mh">0x12</span>
+<span class="w">  </span><span class="mi">3</span><span class="nl">d</span><span class="p">:</span><span class="w">   </span><span class="n">fc</span><span class="w">                      </span><span class="n">cld</span>
+<span class="w">  </span><span class="mi">3</span><span class="nl">e</span><span class="p">:</span><span class="w">   </span><span class="n">f3</span><span class="w"> </span><span class="n">a4</span><span class="w">                   </span><span class="n">rep</span><span class="w"> </span><span class="n">movs</span><span class="w"> </span><span class="n">BYTE</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="nl">es</span><span class="p">:</span><span class="o">[</span><span class="n">edi</span><span class="o">]</span><span class="p">,</span><span class="n">BYTE</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="nl">ds</span><span class="p">:</span><span class="o">[</span><span class="n">esi</span><span class="o">]</span>
 </code></pre></div>
 
 <p>This gave me a starting point to work from for the assembly code and its associated opcodes that would become the patch. But there was still a lot of work to do, not the least of which was determining <em>where</em> to place the patch in the executable. My patch (i.e., the sequence of raw opcodes) worked out to 81 bytes in total. I needed to find that much unused space -- also known as a <a href="https://en.wikipedia.org/wiki/Code_cave">code cave</a> -- in the executable.</p>
 <p>I used the <a href="https://github.com/guitmz/gocave">gocave</a> program, which just looks for sequences of repeating null bytes in an executable. The largest cave it found in the <strong>.text</strong> section was 7 bytes -- nowhere near large enough to hold my patch code. The <strong>.data</strong> and <strong>.rodata</strong> sections, on the other hand, had large caves, but the sections weren't marked as executable. I didn't really want to mess with the executable's section headers, whether by changing read/write/execute permissions, expanding an existing section, or creating an entirely new one. It seemed I was out of luck...</p>
 <p>But as mentioned above, I was able to correlate some code sections with Tcl library functions. One of those functions was <a href="https://core.tcl-lang.org/tcl/file?name=generic/tclIOCmd.c"><strong>Tcl_SocketObjCmd()</strong></a>, which opened a client socket to the specified hostname. But the function also contained several code blocks for server sockets, for example:</p>
-<div class="highlight"><pre><span></span><code> <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">)</span> <span class="err">{</span>
-    <span class="n">AcceptCallback</span> <span class="o">*</span><span class="n">acceptCallbackPtr</span> <span class="o">=</span> <span class="p">(</span><span class="n">AcceptCallback</span> <span class="o">*</span><span class="p">)</span><span class="n">Tcl_Alloc</span><span class="p">(</span><span class="n">sizeof</span><span class="p">(</span><span class="n">AcceptCallback</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nf">if</span><span class="w"> </span><span class="p">(</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">AcceptCallback</span><span class="w"> </span><span class="o">*</span><span class="n">acceptCallbackPtr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">AcceptCallback</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">Tcl_Alloc</span><span class="p">(</span><span class="nf">sizeof</span><span class="p">(</span><span class="n">AcceptCallback</span><span class="p">));</span>
 
-    <span class="n">Tcl_IncrRefCount</span><span class="p">(</span><span class="n">script</span><span class="p">);</span>
-    <span class="n">acceptCallbackPtr</span><span class="o">-&gt;</span><span class="n">script</span> <span class="o">=</span> <span class="n">script</span><span class="p">;</span>
-    <span class="n">acceptCallbackPtr</span><span class="o">-&gt;</span><span class="n">interp</span> <span class="o">=</span> <span class="n">interp</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Tcl_IncrRefCount</span><span class="p">(</span><span class="n">script</span><span class="p">);</span>
+<span class="w">    </span><span class="n">acceptCallbackPtr</span><span class="o">-&gt;</span><span class="n">script</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">script</span><span class="p">;</span>
+<span class="w">    </span><span class="n">acceptCallbackPtr</span><span class="o">-&gt;</span><span class="n">interp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interp</span><span class="p">;</span>
 
-    <span class="n">chan</span> <span class="o">=</span> <span class="n">Tcl_OpenTcpServerEx</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="k">host</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">backlog</span><span class="p">,</span>
-        <span class="n">AcceptCallbackProc</span><span class="p">,</span> <span class="n">acceptCallbackPtr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">chan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tcl_OpenTcpServerEx</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="n">port</span><span class="p">,</span><span class="w"> </span><span class="n">host</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">,</span><span class="w"> </span><span class="n">backlog</span><span class="p">,</span>
+<span class="w">        </span><span class="n">AcceptCallbackProc</span><span class="p">,</span><span class="w"> </span><span class="n">acceptCallbackPtr</span><span class="p">);</span>
 
-    <span class="cm">/* Server-specific code continues for several more lines... */</span>
-  <span class="err">}</span> <span class="k">else</span> <span class="err">{</span>
-    <span class="cm">/* Client code here -- MUST NOT TOUCH! */</span>
-  <span class="err">}</span>
+<span class="w">    </span><span class="cm">/* Server-specific code continues for several more lines... */</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="n">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Client code here -- MUST NOT TOUCH! */</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 
 <p>wxtoimg was just a TCP client though, so those blocks of server code were unused and taking up space -- space I could put to good use. That particular server code block above occupied 201 bytes, which was more than enough room for my 81-byte patch. And crucially, one of the parameters for the <strong>Tcl_SocketObjCmd()</strong> function was the target hostname ("celestrak.com").</p>
@@ -255,7 +255,7 @@ close(8)                                = 0
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy; 2023 Chris Coffey (ccoff) &mdash;
+    Copyright &copy; 2025 Chris Coffey (ccoff) &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://ccoff.github.io/theme/js/modernizr-2.0.js"></script>

@@ -38,7 +38,7 @@ I had a 100-foot spool of 16 AWG speaker wire, so a [random wire antenna](https:
 
 <figure>
 <a href="images/shortwave-antenna.jpg"><img src="images/shortwave-antenna.jpg" alt="Image: Random wire antenna" width="520" height="520" /></a>
-<figcaption>Random wire antenna on the roof (indicated by red arrows). Also visible between the arrows is my <a href="http://www.radioforeveryone.com/p/coketenna-easy-cheap-effec.html">"Coketenna"</a> for tracking airplanes.</figcaption>
+<figcaption>Random wire antenna on the roof (indicated by red arrows). Also visible between the arrows is my <a href="https://www.rtl-sdr.com/radio-for-everyone-an-easy-ads-b-antenna-ads-b-advice-and-long-term-results/">"Coketenna"</a> for tracking airplanes.</figcaption>
 </figure>
 
 I ran the wire around most of the roof, down the outside wall and into my office, where I connected it to a [9:1 balun](https://www.nooelec.com/store/balun-one-nine-v2.html). The other balun connection went to ground -- specifically, a wire to the radiator pipe. A ground connection wasn't strictly necessary, but I found that it improved reception on most bands. During my testing, connecting and disconnecting the ground wire from the balun got tiresome, so I wired up a switch to quickly engage or disengage it:

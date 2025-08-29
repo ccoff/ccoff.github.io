@@ -6,9 +6,9 @@ Date: 2023-03-07
 
 I use software-defined radio (SDR) to download [real-time data from weather satellites](https://ccoff.github.io/chasing-weather-satellites-with-sdr). To generate the imagery from the data I use the excellent, but no longer maintained, [wxtoimg](https://wxtoimgrestored.xyz) program on Linux. It generates nice map overlays for the imagery, but to do this correctly, wxtoimg needs up-to-date information on satellite positions. It gets this by downloading the current [orbital data](https://en.wikipedia.org/wiki/Two-line_element_set) from the internet. Unfortunately wxtoimg uses a hard-coded string for the target hostname, so when the domain changed a few months ago from celestrak.*com* to celestrak.*org*, wxtoimg couldn't get its satellite positions, and the map overlays were completely wrong.
 
-wxtoimg is closed-source, so changing the source code and recompiling wasn't an option. I could have written a cron job to fetch the updated satellite data and move it to the configuration folder. But it seemed like it would be easy enough to just patch the program itself to use *celestrak.org* instead of *celestrak.com* and be done with it, with no need for external workarounds.
+wxtoimg is closed-source and abandoned by its developers, so getting a fix or recompiling weren't an option. I could have written a cron job to fetch the updated satellite data and move it to the configuration folder. But it seemed like it would be easy enough to just patch the program itself to use *celestrak.org* instead of *celestrak.com* and be done with it, with no need for external workarounds.
 
-For the uninitiated, you can alter a program's behavior by making relatively small changes directly to its code (also known as "patching a binary"). Sometimes this is for purely malicious purposes, but in my case, I wanted to fix a bug that otherwise could not be fixed because the source code was not available.
+For the uninitiated, you can alter a program's behavior by making relatively small changes directly to its code (also known as "patching a binary"). Sometimes this is for malicious purposes, but in my case, I wanted to fix a bug that otherwise could not be fixed because the source code was not available.
 
 ## Try the easy things first
 
@@ -30,18 +30,18 @@ A regular **send()** call was used to get the satellite data file. It was clear,
 
 ## Static analysis
 
-Static analysis involves examining the disassembled executable without running it. First I determined what exactly I was dealing with:
+Static analysis involves examining the disassembled executable without running it. First I determined what I was dealing with:
 
 ```text
 chris@host:~$ file /usr/local/bin/wxtoimg
 /usr/local/bin/wxtoimg: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.2.5, stripped
 ```
 
-It was a 32-bit executable. I was happy about that, because at the assembly code level I've worked almost entirely in the 16- and 32-bit space --  64-bit not so much. (Back in the late 90's/early 00's, to put food on the table I worked on 16-bit DOS and 32-bit Linux embedded telecom products.)
+It was a 32-bit executable. I was happy about that, because at the assembly code level I've worked almost entirely in the 16- and 32-bit space --  64-bit not so much. (Several years ago, to put food on the table I worked on 16-bit DOS and 32-bit Linux embedded telecom products.)
 
 To do static analysis you need a good disassembler, and in my case, one that also ran on Linux and handled [ELF executables](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format). In the last few years a new player has arrived on the software reverse engineering scene courtesy of the NSA (yes, *that* NSA): [Ghidra](https://ghidra-sre.org). I had never used Ghidra before, but it looked promising with lots of useful features. And unlike other comparable programs costing hundreds of dollars, it was free.
 
-I loaded up wxtoimg in Ghidra, which took a few minutes to disassemble and analyze its code. The Code Browser gave me a list of disassembled functions, a memory map showing the program sections (**.text**, etc), and other useful goodies.
+I loaded up wxtoimg in Ghidra, which then took a few minutes to disassemble and analyze its code. The Code Browser gave me a list of disassembled functions, a memory map showing the program sections (**.text**, etc), and other useful goodies.
 
 Having located the **send()** function, I worked up the call tree, hoping to find where the "celestrak.com" string came from. I made it up one or two levels, but then the trail stopped. When I looked for references to the next function, Ghidra couldn't find anything. This wasn't too surprising; the disassembler does the best it can to make sense of the raw binary code, but it's not perfect, and some things can only be determined at runtime.
 
@@ -49,13 +49,13 @@ I had gone as far as I could with static analysis for the moment, so it was time
 
 ## Unwinding the stack
 
-A brief detour down memory lane: from my software development days, I remember using a program from Microsoft called Codeview. It had a text console split into several windows that allowed you to view a program's memory and registers in real-time while stepping through instructions. It was invaluable for seeing how the stack and memory management worked at a low level.
+A brief detour down memory lane: in my software development days I used a program from Microsoft called Codeview. It had a text console split into several windows that allowed you to view a program's memory and registers in real-time while stepping through instructions. It was invaluable for seeing how the stack and memory management worked at a low level.
 
-What really gave me deeper knowledge of the stack, however, was the excellent article ["Smashing the stack for fun and profit"](https://www.eecs.umich.edu/courses/eecs588/static/stack_smashing.pdf), which first appeared in 1996. The intended audience was those looking to spawn shell code from within a vulnerable executable. Namely, by overwriting parts of the stack via buffer overflow exploits (AKA "smashing the stack"). But the same principles of stack layouts used in cracking applied equally to reverse engineering and non-malicious binary patching.
+What really gave me deeper knowledge of the stack, however, was the excellent article ["Smashing the stack for fun and profit"](https://www.eecs.umich.edu/courses/eecs588/static/stack_smashing.pdf) (which also inspired the title of this blog post). The intended audience was those looking to spawn shell code from within a vulnerable executable. Namely, by overwriting parts of the stack via buffer overflow exploits (AKA "smashing the stack"). But the same principles of stack layouts used in cracking applied equally to reverse engineering and non-malicious binary patching.
 
 Fast forward to the present. In Ghidra I set a breakpoint on **send()**, started wxtoimg, and selected the option to update the satellite data. The debugger (Ghidra uses [gdb](https://www.sourceware.org/gdb) under the hood) stopped and now I had the call stack backtrace.
 
-I hadn't examined a stack at byte level in about 20 years and was rusty. Dredging up my stack-smashing knowledge from days of yore, I looked at the **EBP** register to get the base pointer. Then I went to that address in Ghidra's memory viewer to get to the entry point of the **send()** call. The [**send()** function](https://linux.die.net/man/2/send) has the following call signature:
+I hadn't examined a stack at byte level in several years and was rusty. Dredging up my stack-smashing knowledge from days of yore, I looked at the **EBP** register to get the base pointer. Then I went to that address in Ghidra's memory viewer to get to the entry point of the **send()** call. The [**send()** function](https://linux.die.net/man/2/send) has the following call signature:
 
 ```
 ssize_t send(int sockfd, const void *buf, size_t len, int flags);
@@ -104,7 +104,7 @@ But that gave me an idea -- I downloaded the Tcl source code and found that some
 
 I continued working through the call stack, but started getting lost in a maze of function calls trying to determine where "celestrak.com" came from. It seemed that the embedded Tcl script files were obfuscated in the executable at rest and loaded on the fly. As I continued to work through the function calls it occurred to me that:
 
- 1. Even when I found the right Tcl script, I may not be able to reverse-engineer the obfuscation algorithm to patch it correctly.
+ 1. Even when I found the right Tcl script, I might not be able to reverse-engineer the obfuscation algorithm to patch it correctly.
  2. Even if I patched that particular script in the executable, what if another script somewhere else in the program used a hard-coded "celestrak.com" string? I'd have to repeat the process all over again.
 
 For these reasons, I decided it was easier to intercept the "celestrak.com" hostname string later in the call stack, closer to where it was actually used to open a network connection. In other words, instead of patching an embedded, obfuscated Tcl script in the executable, I would patch the embedded Tcl network library code itself to use the correct hostname.
@@ -112,9 +112,9 @@ For these reasons, I decided it was easier to intercept the "celestrak.com" host
 ## Making the patch
 Patching a binary is not a simple thing. Pitfalls are everywhere: one wrong bit or byte, a miscalculation in a jump, or any other number of slip-ups, and the program will at a minimum exhibit unexpected behavior, or more likely, segfault and crash.
 
-At a macro level, all I wanted to do was look at the hostname string used to open a connection, and if it matched "celestrak.com" replace it with "celestrak.org". But there were some complications. I wanted my patch to be in complete control of the registers, and also avoid using any local variables. That meant avoiding function calls to library routines like **strcmp()** and **strcpy()**, and using instead a self-contained block of code that did the string manipulations with no "outside" interference.
+At a macro level, all I wanted to do was look at the hostname string used to open a connection, and if it matched "celestrak.com" replace it with "celestrak.org". But there were some complications. I wanted my patch to be in complete control of the registers and minimize stack alterations. That meant avoiding function calls to library routines like **strcmp()** and **strcpy()**, and using instead a self-contained block of code that did the string manipulations with no "outside" interference.
 
-I wrote up the patch code in C, compiled it, and then used [objdump](https://en.wikipedia.org/wiki/Objdump) to disassemble it. For example, here's the portion of the patch that copies the correct string to the hostname (because of my DOS days, I "think" in Intel assembly syntax instead of AT&T syntax, so that's what appears below):
+I wrote up the patch code in C, compiled it, and then used [objdump](https://en.wikipedia.org/wiki/Objdump) to disassemble it. For example, here's the portion of the patch that copies the correct string to the hostname value (because of my DOS days, I "think" in Intel assembly syntax instead of AT&T syntax, so that's what appears below):
 
 ```
   32:	8d b3 d0 a5 c2 ff    	lea    esi,[ebx-0x3d5a30]
@@ -123,7 +123,7 @@ I wrote up the patch code in C, compiled it, and then used [objdump](https://en.
   3e:	f3 a4                	rep movs BYTE PTR es:[edi],BYTE PTR ds:[esi]
 ```
 
-This gave me a starting point to work from for the assembly code and its associated opcodes that would become the patch. But there was still a lot of work to do, not the least of which was determining *where* to place the patch in the executable. My patch (i.e., the sequence of raw opcodes) worked out to 81 bytes in total. I needed to find that much unused space -- also known as a [code cave](https://en.wikipedia.org/wiki/Code_cave) -- in the executable.
+This gave me a starting point to work from for the assembly code and its associated opcodes that would ultimately become the patch. But there was still a lot of work to do, not the least of which was determining *where* to place the patch in the executable. My patch (i.e., the sequence of raw opcodes) worked out to 81 bytes in total. I needed to find that much unused space -- also known as a [code cave](https://en.wikipedia.org/wiki/Code_cave) -- in the executable.
 
 I used the [gocave](https://github.com/guitmz/gocave) program, which just looks for sequences of repeating null bytes in an executable. The largest cave it found in the **.text** section was 7 bytes -- nowhere near large enough to hold my patch code. The **.data** and **.rodata** sections, on the other hand, had large caves, but the sections weren't marked as executable. I didn't really want to mess with the executable's section headers, whether by changing read/write/execute permissions, expanding an existing section, or creating an entirely new one. It seemed I was out of luck...
 
@@ -155,7 +155,7 @@ So I had my binary patch code, and somewhere to put it. Still, I couldn't just d
 
 If this sounds like a laborious process, you're right. There's a reason we use compilers to do this dirty work for us whenever possible.
 
-I made the necessary adjustments, copied the bytecode into the executable, and was finally ready to run the patched wxtoimg. Did it work? Of course not. Code never works perfectly the first time through, at least not mine. Especially when working with raw bytecode. When I went to the option in wxtoimg to update the satellite data, the GUI just hung.
+I made the necessary adjustments, copied the bytecode into the executable, and was finally ready to run the patched wxtoimg. Did it work? Of course not. Code hardly ever works perfectly the first time through, speaking for myself at least. Especially when working with raw bytecode. When I went to the option in wxtoimg to update the satellite data, the GUI just hung.
 
 When I added my patch code to the binary, I had overwritten all of the remaining unused server code with [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). But Ghidra indicated that some of what was seemingly unused server code was in fact referenced by binary code branches elsewhere. I had effectively left "hanging" branches that went to nowhere. I didn't know for sure, but I was guessing that even though the program was not actually executing those hanging branches, the CPU was still following them due to [predictive execution](https://en.wikipedia.org/wiki/Branch_predictor). Because I had invalidated some of those paths with NOPs, the program hung.
 
